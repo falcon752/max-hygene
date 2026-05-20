@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book a Cleaning - Max-Hygiene</title>
+    <meta name="description" content="Book your professional cleaning service with Max-Hygiene. Instant quote, online scheduling, and email confirmation.">
+    <link rel="shortcut icon" href="images/logo2.jpeg" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ── Booking Page Styles ── */
+        .booking-hero {
+            background: linear-gradient(135deg, #3bb0bd 0%, #2d3748 100%);
+            padding: 3.5rem 2rem 2.5rem;
+            text-align: center;
+            color: #fff;
+        }
+        .booking-hero h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: .5rem; }
+        .booking-hero p  { font-size: 1.05rem; opacity: .85; }
+
+        /* Progress */
+        .booking-progress {
+            background: #fff;
+            padding: 1.4rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,.07);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 700px;
+            margin: 0 auto;
+            gap: 0;
+        }
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: calc(50% + 18px);
+            right: calc(-50% + 18px);
+            height: 2px;
+            background: #e2e8f0;
+            transition: background .4s;
+        }
+        .progress-step.done:not(:last-child)::after,
+        .progress-step.active:not(:last-child)::after {
+            background: #3bb0bd;
+        }
+        .step-bubble {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #718096;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: .9rem;
+            transition: all .3s;
+            z-index: 1;
+        }
+        .progress-step.active .step-bubble  { background: #3bb0bd; color: #fff; box-shadow: 0 0 0 4px rgba(59,176,189,.2); }
+        .progress-step.done   .step-bubble  { background: #00d97e; color: #fff; }
+        .step-label { font-size: .72rem; color: #718096; margin-top: .35rem; font-weight: 500; white-space: nowrap; }
+        .progress-step.active .step-label { color: #3bb0bd; font-weight: 600; }
+        .progress-step.done   .step-label { color: #00d97e; }
+
+        /* Layout */
+        .booking-layout {
+            display: flex;
+            gap: 1.8rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+            align-items: flex-start;
+        }
+        .booking-main   { flex: 1; min-width: 0; }
+        .booking-panel  {
+            width: 300px; flex-shrink: 0;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 6px 24px rgba(0,0,0,.07);
+            padding: 1.5rem;
+            position: sticky;
+            top: 80px;
+        }
+        .booking-panel.hidden { display: none; }
+        .panel-title {
+            font-size: 1rem; font-weight: 600; color: #2d3748;
+            margin-bottom: 1rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .panel-title i { color: #3bb0bd; }
+        .panel-row {
+            display: flex; justify-content: space-between;
+            font-size: .85rem; color: #4a5568;
+            padding: .4rem 0;
+            border-bottom: 1px dashed #edf2f7;
+        }
+        .panel-row:last-child { border-bottom: none; }
+        .panel-row .label { color: #718096; }
+        .panel-row .value { font-weight: 600; color: #2d3748; text-align: right; }
+        .panel-divider { border: none; border-top: 1px solid #e2e8f0; margin: .8rem 0; }
+        .panel-total-row {
+            display: flex; justify-content: space-between;
+            font-size: 1rem; font-weight: 700;
+            color: #2d3748; margin-top: .5rem;
+        }
+        .panel-total-row .total-amount { color: #3bb0bd; font-size: 1.3rem; }
+        .panel-note { font-size: .75rem; color: #718096; margin-top: .75rem; line-height: 1.5; }
+        .panel-placeholder { text-align: center; color: #a0aec0; font-size: .85rem; padding: 1.5rem 0; }
+        .panel-placeholder i { font-size: 2rem; display: block; margin-bottom: .5rem; opacity: .4; }
+
+        /* Step card */
+        .step-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 6px 24px rgba(0,0,0,.07);
+            padding: 2rem;
+            display: none;
+        }
+        .step-card.active { display: block; }
+        .step-card-title { font-size: 1.4rem; font-weight: 700; color: #2d3748; margin-bottom: .35rem; }
+        .step-card-subtitle { font-size: .9rem; color: #718096; margin-bottom: 1.8rem; }
+
+        /* Service grid */
+        .service-select-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .svc-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.3rem 1rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all .25s;
+            background: #fafafa;
+        }
+        .svc-card:hover { border-color: #3bb0bd; background: #f0fbfc; transform: translateY(-2px); }
+        .svc-card.selected { border-color: #3bb0bd; background: #e8f7f8; box-shadow: 0 0 0 4px rgba(59,176,189,.15); }
+        .svc-icon {
+            width: 52px; height: 52px;
+            background: rgba(59,176,189,.12);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto .9rem;
+            font-size: 1.4rem; color: #3bb0bd;
+            transition: all .25s;
+        }
+        .svc-card.selected .svc-icon,
+        .svc-card:hover .svc-icon { background: #3bb0bd; color: #fff; }
+        .svc-name { font-weight: 600; font-size: .95rem; color: #2d3748; margin-bottom: .25rem; }
+        .svc-price-tag { font-size: .78rem; color: #3bb0bd; font-weight: 600; }
+        .svc-price-tag.hourly { color: #718096; }
+
+        /* Form sections */
+        .form-section-title {
+            font-size: 1rem; font-weight: 600; color: #2d3748;
+            margin: 1.5rem 0 .8rem;
+            padding-bottom: .4rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .form-section-title:first-child { margin-top: 0; }
+
+        /* Property selector */
+        .option-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .pill {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            padding: .45rem 1.1rem;
+            cursor: pointer;
+            font-size: .85rem;
+            font-weight: 500;
+            color: #4a5568;
+            background: #fff;
+            transition: all .2s;
+        }
+        .pill:hover  { border-color: #3bb0bd; color: #3bb0bd; }
+        .pill.active { border-color: #3bb0bd; background: #3bb0bd; color: #fff; }
+
+        /* Pricing toggle */
+        .pricing-toggle-wrap {
+            display: flex; align-items: center;
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: .3rem;
+            gap: .2rem;
+            width: fit-content;
+            margin: .8rem 0;
+        }
+        .pricing-toggle-btn {
+            padding: .5rem 1.3rem;
+            border-radius: 8px;
+            border: none; cursor: pointer;
+            font-size: .875rem; font-weight: 500;
+            color: #718096; background: transparent;
+            transition: all .2s;
+        }
+        .pricing-toggle-btn.active { background: #3bb0bd; color: #fff; box-shadow: 0 2px 8px rgba(59,176,189,.3); }
+
+        /* Hours input */
+        .hours-input-row {
+            display: flex; align-items: center; gap: .75rem;
+            margin: .5rem 0;
+        }
+        .hours-btn {
+            width: 34px; height: 34px;
+            border-radius: 50%; border: 1.5px solid #e2e8f0;
+            background: #fff; cursor: pointer;
+            font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+            transition: all .2s; color: #3bb0bd;
+        }
+        .hours-btn:hover { background: #3bb0bd; color: #fff; border-color: #3bb0bd; }
+        .hours-display { font-size: 1.3rem; font-weight: 700; color: #2d3748; min-width: 40px; text-align: center; }
+        .hours-label { font-size: .85rem; color: #718096; }
+
+        /* Add-ons */
+        .addon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .7rem; }
+        .addon-item {
+            display: flex; align-items: center; gap: .7rem;
+            border: 1.5px solid #e2e8f0; border-radius: 10px;
+            padding: .7rem .9rem; cursor: pointer; background: #fff;
+            transition: all .2s;
+        }
+        .addon-item:hover { border-color: #3bb0bd; background: #f0fbfc; }
+        .addon-item.selected { border-color: #3bb0bd; background: #e8f7f8; }
+        .addon-item input[type="checkbox"] { accent-color: #3bb0bd; width: 16px; height: 16px; cursor: pointer; }
+        .addon-info { flex: 1; }
+        .addon-name { font-size: .83rem; font-weight: 500; color: #2d3748; }
+        .addon-price { font-size: .78rem; color: #3bb0bd; font-weight: 600; }
+
+        /* Frequency */
+        .frequency-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: .75rem; }
+        .freq-card {
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            padding: 1rem .75rem; cursor: pointer; text-align: center;
+            background: #fff; transition: all .25s;
+        }
+        .freq-card:hover  { border-color: #3bb0bd; transform: translateY(-2px); }
+        .freq-card.active { border-color: #3bb0bd; background: #e8f7f8; }
+        .freq-label { font-weight: 600; font-size: .9rem; color: #2d3748; }
+        .freq-badge {
+            display: inline-block; margin-top: .3rem;
+            background: #00d97e; color: #fff;
+            font-size: .68rem; font-weight: 700;
+            padding: .15rem .5rem; border-radius: 20px;
+        }
+        .freq-desc { font-size: .75rem; color: #718096; margin-top: .3rem; }
+
+        /* Calendar */
+        .calendar-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: .8rem;
+        }
+        .cal-nav-btn {
+            background: none; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; padding: .3rem .7rem;
+            cursor: pointer; color: #4a5568;
+            transition: all .2s;
+        }
+        .cal-nav-btn:hover { background: #3bb0bd; color: #fff; border-color: #3bb0bd; }
+        .cal-month-label { font-weight: 600; color: #2d3748; font-size: .95rem; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .25rem; }
+        .cal-day-header { text-align: center; font-size: .72rem; font-weight: 600; color: #718096; padding: .3rem 0; }
+        .cal-day {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; cursor: pointer; font-size: .85rem; font-weight: 500;
+            transition: all .2s; color: #2d3748;
+        }
+        .cal-day:hover:not(.disabled)         { background: #e8f7f8; color: #3bb0bd; }
+        .cal-day.disabled                     { color: #c9d3dd; cursor: default; }
+        .cal-day.booked                       { color: #e2e8f0; cursor: default; text-decoration: line-through; }
+        .cal-day.selected                     { background: #3bb0bd; color: #fff !important; font-weight: 700; box-shadow: 0 2px 8px rgba(59,176,189,.4); }
+        .cal-day.today:not(.selected)         { border: 2px solid #3bb0bd; color: #3bb0bd; font-weight: 700; }
+
+        /* Time slots */
+        .time-slots-wrap { margin-top: 1.2rem; }
+        .time-slots-title { font-size: .85rem; font-weight: 600; color: #2d3748; margin-bottom: .6rem; }
+        .time-slots-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .time-slot {
+            padding: .45rem 1.1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px; cursor: pointer;
+            font-size: .82rem; font-weight: 500;
+            color: #4a5568; background: #fff;
+            transition: all .2s;
+        }
+        .time-slot:hover:not(.unavailable)    { border-color: #3bb0bd; color: #3bb0bd; }
+        .time-slot.selected                   { background: #3bb0bd; color: #fff; border-color: #3bb0bd; }
+        .time-slot.unavailable                { color: #c9d3dd; cursor: default; text-decoration: line-through; }
+
+        /* Contact form */
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .booking-form .form-group { margin-bottom: 1rem; }
+        .booking-form label { display: block; font-size: .82rem; font-weight: 600; color: #4a5568; margin-bottom: .35rem; }
+        .booking-form input,
+        .booking-form textarea {
+            width: 100%; padding: .7rem 1rem;
+            border: 1.5px solid #e2e8f0; border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: .875rem; color: #2d3748;
+            transition: border .2s;
+            background: #fff;
+        }
+        .booking-form input:focus,
+        .booking-form textarea:focus {
+            outline: none; border-color: #3bb0bd;
+            box-shadow: 0 0 0 3px rgba(59,176,189,.15);
+        }
+        .booking-form textarea { resize: vertical; min-height: 80px; }
+        .booking-form input.error { border-color: #fc5c7d; }
+        .field-error { font-size: .75rem; color: #fc5c7d; margin-top: .25rem; display: none; }
+
+        /* Buttons */
+        .step-actions {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 2rem; padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .btn-back {
+            display: flex; align-items: center; gap: .4rem;
+            padding: .65rem 1.5rem; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; background: #fff; cursor: pointer;
+            font-size: .875rem; font-weight: 500; color: #4a5568;
+            transition: all .2s; font-family: 'Poppins', sans-serif;
+        }
+        .btn-back:hover { border-color: #3bb0bd; color: #3bb0bd; }
+        .btn-continue {
+            display: flex; align-items: center; gap: .45rem;
+            padding: .7rem 2rem; background: #3bb0bd; color: #fff;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-size: .9rem; font-weight: 600;
+            transition: all .2s; font-family: 'Poppins', sans-serif;
+        }
+        .btn-continue:hover { background: #2a9ba7; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,176,189,.35); }
+        .btn-continue:disabled { background: #b2d8db; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-submit {
+            display: flex; align-items: center; gap: .5rem;
+            padding: .75rem 2.5rem; background: #3bb0bd; color: #fff;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-size: .95rem; font-weight: 600;
+            transition: all .2s; font-family: 'Poppins', sans-serif;
+        }
+        .btn-submit:hover { background: #2a9ba7; box-shadow: 0 4px 12px rgba(59,176,189,.35); }
+        .btn-submit:disabled { background: #b2d8db; cursor: not-allowed; }
+        .btn-spinner { display: none; }
+        .btn-submit.loading .btn-text   { display: none; }
+        .btn-submit.loading .btn-spinner { display: inline-flex; align-items: center; gap: .4rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner-icon { animation: spin .7s linear infinite; display: inline-block; }
+
+        /* Confirmation step */
+        .confirmation-wrap { text-align: center; padding: 1rem 0 2rem; }
+        .confirm-icon {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #3bb0bd, #00d97e);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem; font-size: 2rem; color: #fff;
+            box-shadow: 0 8px 24px rgba(59,176,189,.3);
+        }
+        .confirm-title { font-size: 1.8rem; font-weight: 700; color: #2d3748; margin-bottom: .5rem; }
+        .confirm-sub   { color: #718096; font-size: 1rem; margin-bottom: 2rem; }
+        .booking-ref-box {
+            display: inline-flex; align-items: center; gap: .6rem;
+            background: #f0fbfc; border: 1.5px solid #3bb0bd;
+            border-radius: 10px; padding: .6rem 1.4rem;
+            font-weight: 700; color: #3bb0bd; font-size: 1.05rem;
+            margin-bottom: 2rem; letter-spacing: .05em;
+        }
+        .quote-summary-card {
+            background: #f7fafc;
+            border-radius: 14px; padding: 1.5rem;
+            max-width: 480px; margin: 0 auto 2rem;
+            text-align: left;
+        }
+        .qs-title { font-weight: 700; color: #2d3748; margin-bottom: 1rem; font-size: 1.05rem; }
+        .qs-row {
+            display: flex; justify-content: space-between;
+            font-size: .875rem; color: #4a5568; padding: .45rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .qs-row:last-child { border-bottom: none; }
+        .qs-row .ql { color: #718096; }
+        .qs-row .qv { font-weight: 600; color: #2d3748; }
+        .qs-total-row {
+            display: flex; justify-content: space-between;
+            font-size: 1.1rem; font-weight: 700;
+            color: #2d3748; margin-top: .75rem;
+        }
+        .qs-total-row .total-val { color: #3bb0bd; font-size: 1.4rem; }
+        .confirm-note {
+            background: #fffbeb; border: 1px solid #f6c90e;
+            border-radius: 10px; padding: 1rem 1.2rem;
+            font-size: .85rem; color: #744210;
+            max-width: 480px; margin: 0 auto 1.5rem;
+            display: flex; gap: .6rem; text-align: left;
+        }
+        .confirm-note i { color: #d69e2e; flex-shrink: 0; margin-top: .1rem; }
+        .confirm-email-note { font-size: .85rem; color: #718096; margin-bottom: 1.5rem; }
+        .confirm-email-note strong { color: #3bb0bd; }
+        .btn-home {
+            display: inline-flex; align-items: center; gap: .5rem;
+            padding: .7rem 2rem; background: #2d3748; color: #fff;
+            border-radius: 8px; font-size: .9rem; font-weight: 600;
+            transition: all .2s; text-decoration: none;
+        }
+        .btn-home:hover { background: #3bb0bd; transform: translateY(-1px); }
+
+        /* Error toast */
+        .toast {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+            background: #fc5c7d; color: #fff;
+            padding: .8rem 1.3rem; border-radius: 10px;
+            font-size: .875rem; font-weight: 500;
+            display: none; align-items: center; gap: .5rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,.15);
+            max-width: 340px;
+        }
+        .toast.show { display: flex; animation: slideUp .3s ease; }
+        .toast.success { background: #00d97e; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Validation hint */
+        .step-validate-hint {
+            font-size: .8rem; color: #fc5c7d;
+            margin-top: 1rem; display: none; text-align: right;
+        }
+        .step-validate-hint.show { display: block; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .booking-layout  { flex-direction: column; padding: 1.5rem 1rem 3rem; }
+            .booking-panel   { width: 100%; position: static; }
+            .form-grid-2     { grid-template-columns: 1fr; }
+            .booking-hero h1 { font-size: 1.8rem; }
+        }
+        @media (max-width: 600px) {
+            .service-select-grid  { grid-template-columns: 1fr 1fr; }
+            .addon-grid           { grid-template-columns: 1fr 1fr; }
+            .frequency-grid       { grid-template-columns: 1fr 1fr; }
+            .booking-progress     { padding: 1rem; }
+            .step-label           { display: none; }
+            .step-card            { padding: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-header-container">
+            <div class="mobile-logo">
+                <img src="images/logo1.png" alt="Max-Hygiene Logo">
+            </div>
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <img src="images/logo1.png" alt="Max-Hygiene Logo" class="logo-img">
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html#home"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="index.html#services"><i class="fas fa-broom"></i> Services</a></li>
+            <li><a href="index.html#why-choose-us"><i class="fas fa-star"></i> Why Choose Us</a></li>
+            <li><a href="index.html#about"><i class="fas fa-info-circle"></i> About</a></li>
+            <li><a href="index.html#gallery"><i class="fas fa-images"></i> Gallery</a></li>
+            <li><a href="index.html#testimonials"><i class="fas fa-quote-left"></i> Testimonials</a></li>
+            <li><a href="index.html#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+            <li><a href="booking.html" class="active"><i class="fas fa-calendar-check"></i> Book Now</a></li>
+        </ul>
+        <div class="social-links">
+            <a href=""><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="main-content">
+        <!-- Hero -->
+        <div class="booking-hero">
+            <h1><i class="fas fa-calendar-check" style="margin-right:.5rem;"></i>Book Your Cleaning</h1>
+            <p>Professional cleaning across Glasgow &amp; surroundings (30 miles). Instant quote, no payment online.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="booking-progress">
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-bubble">1</div>
+                    <span class="step-label">Service</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-bubble">2</div>
+                    <span class="step-label">Details</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-bubble">3</div>
+                    <span class="step-label">Schedule</span>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-bubble">4</div>
+                    <span class="step-label">Your Info</span>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-bubble"><i class="fas fa-check" style="font-size:.75rem;"></i></div>
+                    <span class="step-label">Quote</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Layout -->
+        <div class="booking-layout">
+            <!-- Steps -->
+            <div class="booking-main">
+
+                <!-- ── STEP 1: Service ── -->
+                <div class="step-card active" id="step-1">
+                    <div class="step-card-title">Choose Your Service</div>
+                    <div class="step-card-subtitle">Select the type of cleaning you need.</div>
+                    <div class="service-select-grid" id="serviceGrid"></div>
+                    <div class="step-validate-hint" id="hint1">Please select a service to continue.</div>
+                    <div class="step-actions">
+                        <span></span>
+                        <button class="btn-continue" onclick="goToStep(2)">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 2: Details ── -->
+                <div class="step-card" id="step-2">
+                    <div class="step-card-title">Cleaning Details</div>
+                    <div class="step-card-subtitle">Help us size up the job so your quote is accurate.</div>
+
+                    <!-- Property Type -->
+                    <div class="form-section-title">Property Type</div>
+                    <div class="option-pills" id="propertyTypePills">
+                        <div class="pill active" data-val="house">House</div>
+                        <div class="pill" data-val="apartment">Apartment / Flat</div>
+                        <div class="pill" data-val="office">Office / Commercial</div>
+                        <div class="pill" data-val="other">Other</div>
+                    </div>
+
+                    <!-- Bedrooms -->
+                    <div class="form-section-title" id="bedroomSection">Number of Bedrooms</div>
+                    <div class="option-pills" id="bedroomPills">
+                        <div class="pill active" data-val="1">1 Bed</div>
+                        <div class="pill" data-val="2">2 Beds</div>
+                        <div class="pill" data-val="3">3 Beds</div>
+                        <div class="pill" data-val="4">4 Beds</div>
+                        <div class="pill" data-val="5">5+ Beds</div>
+                    </div>
+
+                    <!-- Bathrooms -->
+                    <div class="form-section-title">Number of Bathrooms</div>
+                    <div class="option-pills" id="bathroomPills">
+                        <div class="pill active" data-val="1">1</div>
+                        <div class="pill" data-val="2">2</div>
+                        <div class="pill" data-val="3">3</div>
+                        <div class="pill" data-val="4">4+</div>
+                    </div>
+
+                    <!-- Pricing Type -->
+                    <div class="form-section-title">Pricing Type</div>
+                    <div class="pricing-toggle-wrap">
+                        <button class="pricing-toggle-btn active" id="btnFlat" onclick="setPricingType('flat')">
+                            <i class="fas fa-tag"></i> Flat Rate
+                        </button>
+                        <button class="pricing-toggle-btn" id="btnHourly" onclick="setPricingType('hourly')">
+                            <i class="fas fa-clock"></i> Hourly Rate
+                        </button>
+                    </div>
+                    <div id="hourlyControls" style="display:none;">
+                        <p style="font-size:.82rem;color:#718096;margin:.2rem 0 .6rem;">Estimated cleaning hours:</p>
+                        <div class="hours-input-row">
+                            <button class="hours-btn" onclick="changeHours(-1)"><i class="fas fa-minus"></i></button>
+                            <div class="hours-display" id="hoursDisplay">3</div>
+                            <button class="hours-btn" onclick="changeHours(1)"><i class="fas fa-plus"></i></button>
+                            <span class="hours-label">hrs &nbsp;×&nbsp; <strong id="rateLabel">£20/hr</strong></span>
+                        </div>
+                    </div>
+                    <div id="flatInfo" style="font-size:.82rem;color:#718096;margin:.4rem 0;">
+                        Flat rates are fixed prices based on property size.
+                    </div>
+
+                    <!-- Add-ons -->
+                    <div class="form-section-title">Extra Services <span style="font-weight:400;color:#718096;">(optional)</span></div>
+                    <div class="addon-grid" id="addonGrid"></div>
+
+                    <div class="step-actions">
+                        <button class="btn-back" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button class="btn-continue" onclick="goToStep(3)">Continue <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 3: Schedule ── -->
+                <div class="step-card" id="step-3">
+                    <div class="step-card-title">Choose Your Schedule</div>
+                    <div class="step-card-subtitle">Pick how often, then select a date and time that works for you.</div>
+
+                    <!-- Frequency -->
+                    <div class="form-section-title">Cleaning Frequency</div>
+                    <div class="frequency-grid" id="frequencyGrid"></div>
+
+                    <!-- Calendar -->
+                    <div class="form-section-title" style="margin-top:1.8rem;">Select a Date
+                        <span style="font-weight:400;font-size:.78rem;color:#718096;margin-left:.5rem;">Mon – Sat only</span>
+                    </div>
+                    <div class="calendar-nav">
+                        <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <span class="cal-month-label" id="calMonthLabel"></span>
+                        <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="calGrid"></div>
+
+                    <!-- Time slots -->
+                    <div class="time-slots-wrap" id="timeSlotsWrap" style="display:none;">
+                        <div class="time-slots-title"><i class="fas fa-clock" style="color:#3bb0bd;margin-right:.3rem;"></i>Available Times</div>
+                        <div class="time-slots-grid" id="timeSlotGrid"></div>
+                    </div>
+
+                    <div class="step-validate-hint" id="hint3">Please select both a date and a time slot.</div>
+                    <div class="step-actions">
+                        <button class="btn-back" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button class="btn-continue" onclick="goToStep(4)">Continue <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 4: Contact Info ── -->
+                <div class="step-card" id="step-4">
+                    <div class="step-card-title">Your Information</div>
+                    <div class="step-card-subtitle">We need a few details to confirm your booking and send your quote.</div>
+
+                    <form class="booking-form" id="bookingForm" novalidate>
+                        <div class="form-section-title">Personal Details</div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" placeholder="John" required>
+                                <div class="field-error" id="err-firstName">Please enter your first name.</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" placeholder="Smith" required>
+                                <div class="field-error" id="err-lastName">Please enter your last name.</div>
+                            </div>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" placeholder="john@example.com" required>
+                                <div class="field-error" id="err-email">Please enter a valid email.</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input type="tel" id="phone" placeholder="+44 7700 000000" required>
+                                <div class="field-error" id="err-phone">Please enter a valid phone number.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Service Address</div>
+                        <div class="form-group">
+                            <label for="addressLine">Address Line *</label>
+                            <input type="text" id="addressLine" placeholder="15 Example Street" required>
+                            <div class="field-error" id="err-addressLine">Please enter your address.</div>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="city">City / Town *</label>
+                                <input type="text" id="city" placeholder="Glasgow" required>
+                                <div class="field-error" id="err-city">Please enter your city.</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="postcode">Postcode *</label>
+                                <input type="text" id="postcode" placeholder="G1 1AB" required>
+                                <div class="field-error" id="err-postcode">Please enter your postcode.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Additional Notes <span style="font-weight:400;color:#718096;">(optional)</span></div>
+                        <div class="form-group">
+                            <label for="notes">Special instructions or access info</label>
+                            <textarea id="notes" placeholder="e.g. key under mat, dog on premises, focus on kitchen..."></textarea>
+                        </div>
+                    </form>
+
+                    <div class="step-actions">
+                        <button class="btn-back" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button class="btn-submit" id="submitBtn" onclick="submitBooking()">
+                            <span class="btn-text"><i class="fas fa-paper-plane"></i> Get My Free Quote</span>
+                            <span class="btn-spinner">
+                                <i class="fas fa-circle-notch spinner-icon"></i> Sending…
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 5: Quote / Confirmation ── -->
+                <div class="step-card" id="step-5">
+                    <div class="confirmation-wrap">
+                        <div class="confirm-icon"><i class="fas fa-check"></i></div>
+                        <div class="confirm-title">Booking Received!</div>
+                        <div class="confirm-sub">Your request has been sent. The Max-Hygiene team will confirm shortly.</div>
+
+                        <div class="booking-ref-box">
+                            <i class="fas fa-hashtag"></i>
+                            <span id="bookingRefDisplay">MH-2026-XXXXX</span>
+                        </div>
+
+                        <div class="confirm-email-note">
+                            A confirmation email has been sent to <strong id="clientEmailDisplay"></strong>
+                        </div>
+
+                        <div class="quote-summary-card" id="quoteSummaryCard"></div>
+
+                        <div class="confirm-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>
+                                <strong>No payment required today.</strong> If you chose a flat rate, we'll finalise the price with you directly. Hourly jobs are billed after the clean based on actual time.
+                            </span>
+                        </div>
+
+                        <a href="index.html" class="btn-home">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Price Panel -->
+            <aside class="booking-panel" id="pricePanel">
+                <div class="panel-title"><i class="fas fa-receipt"></i> Estimated Cost</div>
+                <div id="pricePanelContent">
+                    <div class="panel-placeholder">
+                        <i class="fas fa-hand-point-left"></i>
+                        Select a service to see your estimate
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="images/logo1.png" alt="Max-Hygiene Logo">
+                        <p>Professional cleaning services in Glasgow, UK.</p>
+                    </div>
+                    <div class="footer-social">
+                        <a href="" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                        <li><a href="booking.html">Book Now</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <div class="footer-contact">
+                        <p><i class="fas fa-map-marker-alt"></i> Technology House, 9 Newton Place, Glasgow G3 7PR</p>
+                        <p><i class="fas fa-phone"></i> +44 7743173136</p>
+                        <p><i class="fas fa-envelope"></i> MaxHygiene100@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="container">
+                    <p>&copy; <span id="current-year"></span> Max-Hygiene. All Rights Reserved.</p>
+                    <div class="footer-legal">
+                        <a href="#">Privacy Policy</a><span>|</span><a href="#">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Emails are sent server-side via send-booking.php using Gmail SMTP. -->
+    <script>
+
+    // ── Pricing data ──
+    const SERVICES = [
+        {
+            id: 'residential', name: 'Residential Cleaning', icon: 'fas fa-home',
+            flat: { '1': 75, '2': 90, '3': 120, '4': 150, '5': 180 },
+            hourlyRate: 20, hasFlatRate: true,
+            priceTag: 'From £75 flat / £20 p/hr',
+            desc: 'Regular home cleaning'
+        },
+        {
+            id: 'office', name: 'Office Cleaning', icon: 'fas fa-building',
+            flat: null, hourlyRate: 22, hasFlatRate: false,
+            priceTag: '£22 per hour',
+            desc: 'Professional workspace cleaning'
+        },
+        {
+            id: 'deep', name: 'Deep Cleaning', icon: 'fas fa-broom',
+            flat: { '1': 140, '2': 170, '3': 220, '4': 270, '5': 320 },
+            hourlyRate: 25, hasFlatRate: true,
+            priceTag: 'From £140 flat / £25 p/hr',
+            desc: 'Intensive top-to-bottom clean'
+        },
+        {
+            id: 'moveout', name: 'Move-In / Move-Out', icon: 'fas fa-truck-moving',
+            flat: { '1': 170, '2': 210, '3': 260, '4': 310, '5': 360 },
+            hourlyRate: 25, hasFlatRate: true,
+            priceTag: 'From £170 flat / £25 p/hr',
+            desc: 'Full property ready for handover'
+        },
+        {
+            id: 'postconstruction', name: 'Post-Construction', icon: 'fas fa-hammer',
+            flat: null, hourlyRate: 28, hasFlatRate: false,
+            priceTag: '£28 per hour',
+            desc: 'Dust, debris & final polish'
+        },
+        {
+            id: 'event', name: 'Event Cleanup', icon: 'fas fa-glass-cheers',
+            flat: null, hourlyRate: 22, hasFlatRate: false,
+            priceTag: '£22 per hour',
+            desc: 'Before & after event cleaning'
+        }
+    ];
+
+    const ADDONS = [
+        { id: 'oven',    name: 'Inside Oven Clean',    price: 25, icon: 'fas fa-fire' },
+        { id: 'fridge',  name: 'Inside Fridge Clean',  price: 15, icon: 'fas fa-snowflake' },
+        { id: 'cabinets',name: 'Inside Cabinets',       price: 20, icon: 'fas fa-door-open' },
+        { id: 'laundry', name: 'Laundry (wash & dry)', price: 20, icon: 'fas fa-tshirt' },
+        { id: 'ironing', name: 'Ironing Service',       price: 25, icon: 'fas fa-wind' },
+        { id: 'windows', name: 'Interior Windows',      price: 30, icon: 'fas fa-th' },
+        { id: 'carpet',  name: 'Carpet Steam Clean',    price: 40, icon: 'fas fa-couch' }
+    ];
+
+    const FREQUENCIES = [
+        { id: 'oneTime',   label: 'One-Time',       discount: 0,    badge: null,       desc: 'Single visit' },
+        { id: 'weekly',    label: 'Weekly',          discount: 0.15, badge: 'Save 15%', desc: 'Every week' },
+        { id: 'biweekly',  label: 'Every 2 Weeks',   discount: 0.10, badge: 'Save 10%', desc: 'Fortnightly' },
+        { id: 'monthly',   label: 'Monthly',         discount: 0.05, badge: 'Save 5%',  desc: 'Once a month' }
+    ];
+
+    const TIME_SLOTS_ALL = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+
+    // ── Booking state ──
+    const state = {
+        step: 1,
+        service: null,
+        propertyType: 'house',
+        bedrooms: '1',
+        bathrooms: '1',
+        pricingType: 'flat',
+        hours: 3,
+        addons: [],
+        frequency: 'oneTime',
+        calYear: null,
+        calMonth: null,
+        date: null,
+        timeSlot: null,
+        contact: {},
+        bookingRef: null,
+        prices: { base: 0, addons: 0, discount: 0, total: 0, isQuote: false }
+    };
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        state.calYear  = now.getFullYear();
+        state.calMonth = now.getMonth();
+        renderServiceGrid();
+        renderAddonGrid();
+        renderFrequencyGrid();
+        renderCalendar();
+        document.getElementById('current-year').textContent = now.getFullYear();
+        initPillListeners('propertyTypePills', 'propertyType');
+        initPillListeners('bedroomPills',      'bedrooms');
+        initPillListeners('bathroomPills',     'bathrooms');
+    });
+
+    // ── Render service cards ──
+    function renderServiceGrid() {
+        const grid = document.getElementById('serviceGrid');
+        grid.innerHTML = SERVICES.map(s => `
+            <div class="svc-card${state.service === s.id ? ' selected' : ''}" data-id="${s.id}" onclick="selectService('${s.id}')">
+                <div class="svc-icon"><i class="${s.icon}"></i></div>
+                <div class="svc-name">${s.name}</div>
+                <div class="svc-desc" style="font-size:.75rem;color:#718096;margin:.2rem 0 .35rem;">${s.desc}</div>
+                <div class="svc-price-tag${!s.hasFlatRate ? ' hourly' : ''}">${s.priceTag}</div>
+            </div>
+        `).join('');
+    }
+
+    function selectService(id) {
+        state.service = id;
+        renderServiceGrid();
+        const svc = SERVICES.find(s => s.id === id);
+        if (svc && !svc.hasFlatRate) {
+            state.pricingType = 'hourly';
+            document.getElementById('btnFlat').classList.remove('active');
+            document.getElementById('btnHourly').classList.add('active');
+            document.getElementById('hourlyControls').style.display = 'block';
+            document.getElementById('flatInfo').style.display = 'none';
+            document.getElementById('btnFlat').disabled = true;
+            document.getElementById('btnFlat').style.opacity = '.45';
+        } else {
+            document.getElementById('btnFlat').disabled = false;
+            document.getElementById('btnFlat').style.opacity = '1';
+        }
+        updateRateLabel();
+        calculatePrice();
+        updatePricePanel();
+        document.getElementById('hint1').classList.remove('show');
+    }
+
+    // ── Render addons ──
+    function renderAddonGrid() {
+        document.getElementById('addonGrid').innerHTML = ADDONS.map(a => `
+            <label class="addon-item${state.addons.includes(a.id) ? ' selected' : ''}" onclick="toggleAddon('${a.id}')">
+                <input type="checkbox" ${state.addons.includes(a.id) ? 'checked' : ''} onclick="event.stopPropagation()">
+                <div class="addon-info">
+                    <div class="addon-name"><i class="${a.icon}" style="margin-right:.3rem;color:#3bb0bd;"></i>${a.name}</div>
+                    <div class="addon-price">+£${a.price}</div>
+                </div>
+            </label>
+        `).join('');
+    }
+
+    function toggleAddon(id) {
+        const idx = state.addons.indexOf(id);
+        if (idx > -1) state.addons.splice(idx, 1);
+        else state.addons.push(id);
+        renderAddonGrid();
+        calculatePrice();
+        updatePricePanel();
+    }
+
+    // ── Frequency ──
+    function renderFrequencyGrid() {
+        document.getElementById('frequencyGrid').innerHTML = FREQUENCIES.map(f => `
+            <div class="freq-card${state.frequency === f.id ? ' active' : ''}" onclick="selectFrequency('${f.id}')">
+                <div class="freq-label">${f.label}</div>
+                ${f.badge ? `<div class="freq-badge">${f.badge}</div>` : ''}
+                <div class="freq-desc">${f.desc}</div>
+            </div>
+        `).join('');
+    }
+
+    function selectFrequency(id) {
+        state.frequency = id;
+        renderFrequencyGrid();
+        calculatePrice();
+        updatePricePanel();
+    }
+
+    // ── Pricing type toggle ──
+    function setPricingType(type) {
+        const svc = SERVICES.find(s => s.id === state.service);
+        if (svc && !svc.hasFlatRate && type === 'flat') return;
+        state.pricingType = type;
+        document.getElementById('btnFlat').classList.toggle('active', type === 'flat');
+        document.getElementById('btnHourly').classList.toggle('active', type === 'hourly');
+        document.getElementById('hourlyControls').style.display = type === 'hourly' ? 'block' : 'none';
+        document.getElementById('flatInfo').style.display       = type === 'flat'   ? 'block' : 'none';
+        calculatePrice();
+        updatePricePanel();
+    }
+
+    function changeHours(delta) {
+        state.hours = Math.max(1, Math.min(24, state.hours + delta));
+        document.getElementById('hoursDisplay').textContent = state.hours;
+        calculatePrice();
+        updatePricePanel();
+    }
+
+    function updateRateLabel() {
+        const svc = SERVICES.find(s => s.id === state.service);
+        if (svc) document.getElementById('rateLabel').textContent = `£${svc.hourlyRate}/hr`;
+    }
+
+    // ── Pills ──
+    function initPillListeners(containerId, stateKey) {
+        document.getElementById(containerId).addEventListener('click', e => {
+            const pill = e.target.closest('.pill');
+            if (!pill) return;
+            document.querySelectorAll(`#${containerId} .pill`).forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            state[stateKey] = pill.dataset.val;
+            calculatePrice();
+            updatePricePanel();
+        });
+    }
+
+    // ── Price calculator ──
+    function calculatePrice() {
+        const svc = SERVICES.find(s => s.id === state.service);
+        if (!svc) { state.prices = { base: 0, addons: 0, discount: 0, total: 0, isQuote: false }; return; }
+
+        let base = 0;
+        const isQuote = false;
+
+        if (state.pricingType === 'flat' && svc.hasFlatRate) {
+            const key = parseInt(state.bedrooms) >= 5 ? '5' : state.bedrooms;
+            base = svc.flat[key] || svc.flat['1'];
+        } else {
+            base = svc.hourlyRate * state.hours;
+        }
+
+        const addonsTotal = state.addons.reduce((sum, id) => {
+            const a = ADDONS.find(x => x.id === id);
+            return sum + (a ? a.price : 0);
+        }, 0);
+
+        const freqObj = FREQUENCIES.find(f => f.id === state.frequency);
+        const discount = freqObj ? base * freqObj.discount : 0;
+
+        const total = (base - discount) + addonsTotal;
+        state.prices = { base, addons: addonsTotal, discount, total, isQuote };
+    }
+
+    // ── Price panel ──
+    function updatePricePanel() {
+        const svc = SERVICES.find(s => s.id === state.service);
+        const panel = document.getElementById('pricePanelContent');
+
+        if (!svc) {
+            panel.innerHTML = `<div class="panel-placeholder"><i class="fas fa-hand-point-left"></i>Select a service to see your estimate</div>`;
+            return;
+        }
+
+        calculatePrice();
+        const p = state.prices;
+        const freq = FREQUENCIES.find(f => f.id === state.frequency);
+
+        let html = '';
+        html += `<div class="panel-row"><span class="label">${svc.name}</span><span class="value"></span></div>`;
+
+        if (state.pricingType === 'flat' && svc.hasFlatRate) {
+            html += `<div class="panel-row"><span class="label">Flat Rate (${state.bedrooms} bed)</span><span class="value">£${p.base.toFixed(2)}</span></div>`;
+        } else {
+            html += `<div class="panel-row"><span class="label">${state.hours} hrs × £${svc.hourlyRate}</span><span class="value">£${p.base.toFixed(2)}</span></div>`;
+        }
+
+        if (p.discount > 0) {
+            html += `<div class="panel-row"><span class="label">${freq.label} discount</span><span class="value" style="color:#00d97e;">−£${p.discount.toFixed(2)}</span></div>`;
+        }
+
+        if (p.addons > 0) {
+            html += `<div class="panel-row"><span class="label">Extras (${state.addons.length})</span><span class="value">+£${p.addons.toFixed(2)}</span></div>`;
+        }
+
+        html += `<hr class="panel-divider">`;
+        html += `<div class="panel-total-row"><span>Estimated Total</span><span class="total-amount">£${p.total.toFixed(2)}</span></div>`;
+
+        if (state.pricingType === 'hourly') {
+            html += `<div class="panel-note"><i class="fas fa-info-circle" style="color:#3bb0bd;margin-right:.3rem;"></i>Hourly rate. Final amount billed after the clean based on actual hours worked.</div>`;
+        } else {
+            html += `<div class="panel-note"><i class="fas fa-info-circle" style="color:#3bb0bd;margin-right:.3rem;"></i>Flat rate. Final price confirmed with you before the clean.</div>`;
+        }
+
+        if (state.date) {
+            html += `<hr class="panel-divider"><div class="panel-row"><span class="label"><i class="fas fa-calendar-alt" style="color:#3bb0bd;margin-right:.3rem;"></i>Date</span><span class="value">${formatDisplayDate(state.date)}</span></div>`;
+        }
+        if (state.timeSlot) {
+            html += `<div class="panel-row"><span class="label"><i class="fas fa-clock" style="color:#3bb0bd;margin-right:.3rem;"></i>Time</span><span class="value">${formatTime(state.timeSlot)}</span></div>`;
+        }
+
+        panel.innerHTML = html;
+    }
+
+    // ── Calendar ──
+    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    function renderCalendar() {
+        const { calYear: y, calMonth: m } = state;
+        document.getElementById('calMonthLabel').textContent = `${MONTH_NAMES[m]} ${y}`;
+
+        const firstDay      = new Date(y, m, 1).getDay();
+        const daysInMonth   = new Date(y, m + 1, 0).getDate();
+        const today         = new Date(); today.setHours(0,0,0,0);
+        const tomorrow      = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+        const maxDate       = new Date(today); maxDate.setDate(maxDate.getDate() + 56);
+        const bookedDays    = getSimulatedBookedDays(y, m);
+
+        const dayHeaders    = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        let html = dayHeaders.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+        for (let i = 0; i < firstDay; i++) html += `<div class="cal-day" style="opacity:0;pointer-events:none;"></div>`;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const d = new Date(y, m, day);
+            const dateStr = toISO(d);
+            const isSunday = d.getDay() === 0;
+            const isPast   = d < tomorrow;
+            const isFar    = d > maxDate;
+            const isBooked = bookedDays.includes(day);
+            const isToday  = toISO(d) === toISO(today);
+            const isSelected = state.date === dateStr;
+
+            let cls = 'cal-day';
+            if (isSelected)                                 cls += ' selected';
+            else if (isSunday || isPast || isFar || isBooked) { cls += ' disabled'; if (isBooked) cls += ' booked'; }
+            else                                            { cls += ' available'; if (isToday) cls += ' today'; }
+
+            const clickable = !isSunday && !isPast && !isFar && !isBooked;
+            html += `<div class="${cls}"${clickable ? ` onclick="selectDate('${dateStr}')"` : ''}>${day}</div>`;
+        }
+
+        document.getElementById('calGrid').innerHTML = html;
+    }
+
+    function getSimulatedBookedDays(year, month) {
+        const seed = year * 12 + month;
+        return [
+            ((seed * 7 + 3) % 28) + 1,
+            ((seed * 13 + 9) % 28) + 1,
+            ((seed * 5 + 17) % 28) + 1
+        ];
+    }
+
+    function selectDate(dateStr) {
+        state.date = dateStr;
+        state.timeSlot = null;
+        renderCalendar();
+        renderTimeSlots(dateStr);
+        document.getElementById('timeSlotsWrap').style.display = 'block';
+        updatePricePanel();
+    }
+
+    function renderTimeSlots(dateStr) {
+        const d = new Date(dateStr);
+        const seed = d.getDate() + d.getMonth() * 31;
+        const unavailableIdxs = new Set([seed % 8, (seed + 3) % 8, (seed * 2 + 5) % 8]);
+
+        document.getElementById('timeSlotGrid').innerHTML = TIME_SLOTS_ALL.map((slot, i) => {
+            const unavail   = unavailableIdxs.has(i);
+            const selected  = state.timeSlot === slot;
+            let cls = 'time-slot';
+            if (selected)   cls += ' selected';
+            if (unavail)    cls += ' unavailable';
+            return `<div class="${cls}"${!unavail ? ` onclick="selectTimeSlot('${slot}')"` : ''}>${formatTime(slot)}</div>`;
+        }).join('');
+    }
+
+    function selectTimeSlot(slot) {
+        state.timeSlot = slot;
+        renderTimeSlots(state.date);
+        updatePricePanel();
+        document.getElementById('hint3').classList.remove('show');
+    }
+
+    function changeMonth(delta) {
+        state.calMonth += delta;
+        if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+        if (state.calMonth < 0)  { state.calMonth = 11; state.calYear--; }
+        renderCalendar();
+        if (state.date) {
+            const [y, m] = state.date.split('-').map(Number);
+            if (m - 1 !== state.calMonth || y !== state.calYear) {
+                // date scrolled out of view — keep selection
+            }
+        }
+    }
+
+    // ── Step navigation ──
+    function goToStep(target) {
+        if (target > state.step) {
+            if (!validateStep(state.step)) return;
+        }
+        document.getElementById(`step-${state.step}`).classList.remove('active');
+        document.getElementById(`step-${target}`).classList.add('active');
+
+        // Progress dots
+        document.querySelectorAll('.progress-step').forEach(el => {
+            const n = parseInt(el.dataset.step);
+            el.classList.remove('active', 'done');
+            if (n === target)      el.classList.add('active');
+            else if (n < target)   el.classList.add('done');
+        });
+
+        state.step = target;
+        const showPanel = target < 5;
+        document.getElementById('pricePanel').classList.toggle('hidden', !showPanel);
+        updatePricePanel();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+        if (step === 1) {
+            if (!state.service) {
+                document.getElementById('hint1').classList.add('show');
+                return false;
+            }
+        }
+        if (step === 3) {
+            if (!state.date || !state.timeSlot) {
+                document.getElementById('hint3').classList.add('show');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ── Form submission ──
+    async function submitBooking() {
+        if (!validateContactForm()) return;
+
+        // Collect contact data
+        state.contact = {
+            firstName:   document.getElementById('firstName').value.trim(),
+            lastName:    document.getElementById('lastName').value.trim(),
+            email:       document.getElementById('email').value.trim(),
+            phone:       document.getElementById('phone').value.trim(),
+            addressLine: document.getElementById('addressLine').value.trim(),
+            city:        document.getElementById('city').value.trim(),
+            postcode:    document.getElementById('postcode').value.trim(),
+            notes:       document.getElementById('notes').value.trim()
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        calculatePrice();
+
+        const ref = generateRef();
+        state.bookingRef = ref;
+
+        const svc       = SERVICES.find(s => s.id === state.service);
+        const freq      = FREQUENCIES.find(f => f.id === state.frequency);
+        const addonsStr = state.addons.length
+            ? state.addons.map(id => ADDONS.find(a => a.id === id)?.name).filter(Boolean).join(', ')
+            : 'None';
+        const priceStr  = `£${state.prices.total.toFixed(2)}${state.pricingType === 'hourly' ? ' (estimated)' : ''}`;
+
+        const adminParams = {
+            from_name:         `${state.contact.firstName} ${state.contact.lastName}`,
+            from_email:        state.contact.email,
+            phone:             state.contact.phone,
+            service_name:      svc?.name || state.service,
+            service_address:   state.contact.addressLine,
+            city:              state.contact.city,
+            postcode:          state.contact.postcode,
+            appointment_date:  formatDisplayDate(state.date),
+            appointment_time:  formatTime(state.timeSlot),
+            frequency:         freq?.label || state.frequency,
+            pricing_type:      state.pricingType === 'flat' ? 'Flat Rate' : 'Hourly Rate',
+            addons_list:       addonsStr,
+            base_price:        `£${state.prices.base.toFixed(2)}`,
+            addons_total:      `£${state.prices.addons.toFixed(2)}`,
+            discount_amount:   `£${state.prices.discount.toFixed(2)}`,
+            total_price:       priceStr,
+            special_notes:     state.contact.notes || 'None',
+            booking_ref:       ref,
+            property_type:     state.propertyType,
+            bedrooms:          state.bedrooms,
+            bathrooms:         state.bathrooms
+        };
+
+        const clientParams = {
+            to_name:           state.contact.firstName,
+            to_email:          state.contact.email,
+            service_name:      svc?.name || state.service,
+            appointment_date:  formatDisplayDate(state.date),
+            appointment_time:  formatTime(state.timeSlot),
+            booking_ref:       ref,
+            total_price:       priceStr,
+            pricing_type:      state.pricingType === 'flat' ? 'Flat Rate' : 'Hourly Rate',
+            notes:             state.contact.notes || 'No special instructions'
+        };
+
+        let emailSent = true;
+        try {
+            const resp = await fetch('send-booking.php', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ adminData: adminParams, clientData: clientParams })
+            });
+            const result = await resp.json();
+            if (!result.success) {
+                emailSent = false;
+                console.warn('Mailer error:', result.error);
+            }
+        } catch (err) {
+            console.warn('Fetch error:', err);
+            emailSent = false;
+        }
+
+        btn.classList.remove('loading');
+        btn.disabled = false;
+
+        if (!emailSent) {
+            showToast('Could not send confirmation email. Your booking is noted — please call +44 7743173136 to confirm.', 'error');
+        }
+
+        renderQuoteSummary(ref);
+        goToStep(5);
+    }
+
+    function validateContactForm() {
+        const fields = [
+            { id: 'firstName',   test: v => v.length >= 2 },
+            { id: 'lastName',    test: v => v.length >= 2 },
+            { id: 'email',       test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+            { id: 'phone',       test: v => v.replace(/\D/g, '').length >= 7 },
+            { id: 'addressLine', test: v => v.length >= 4 },
+            { id: 'city',        test: v => v.length >= 2 },
+            { id: 'postcode',    test: v => v.length >= 3 }
+        ];
+        let valid = true;
+        fields.forEach(({ id, test }) => {
+            const el  = document.getElementById(id);
+            const err = document.getElementById(`err-${id}`);
+            const ok  = test(el.value.trim());
+            el.classList.toggle('error', !ok);
+            if (err) err.style.display = ok ? 'none' : 'block';
+            if (!ok) valid = false;
+        });
+        return valid;
+    }
+
+    function renderQuoteSummary(ref) {
+        const svc  = SERVICES.find(s => s.id === state.service);
+        const freq = FREQUENCIES.find(f => f.id === state.frequency);
+        const p    = state.prices;
+        const addonsStr = state.addons.length
+            ? state.addons.map(id => ADDONS.find(a => a.id === id)?.name).filter(Boolean).join(', ')
+            : '—';
+
+        document.getElementById('bookingRefDisplay').textContent = ref;
+        document.getElementById('clientEmailDisplay').textContent = state.contact.email;
+
+        document.getElementById('quoteSummaryCard').innerHTML = `
+            <div class="qs-title"><i class="fas fa-clipboard-list" style="color:#3bb0bd;margin-right:.5rem;"></i>Booking Summary</div>
+            <div class="qs-row"><span class="ql">Service</span><span class="qv">${svc?.name}</span></div>
+            <div class="qs-row"><span class="ql">Property</span><span class="qv">${capitalise(state.propertyType)}, ${state.bedrooms} bed / ${state.bathrooms} bath</span></div>
+            <div class="qs-row"><span class="ql">Date & Time</span><span class="qv">${formatDisplayDate(state.date)} at ${formatTime(state.timeSlot)}</span></div>
+            <div class="qs-row"><span class="ql">Frequency</span><span class="qv">${freq?.label}</span></div>
+            <div class="qs-row"><span class="ql">Pricing Type</span><span class="qv">${state.pricingType === 'flat' ? 'Flat Rate' : 'Hourly Rate'}</span></div>
+            ${state.pricingType === 'hourly' ? `<div class="qs-row"><span class="ql">Est. Hours</span><span class="qv">${state.hours} hrs</span></div>` : ''}
+            <div class="qs-row"><span class="ql">Extras</span><span class="qv">${addonsStr}</span></div>
+            <div class="qs-row"><span class="ql">Base Price</span><span class="qv">£${p.base.toFixed(2)}</span></div>
+            ${p.discount > 0 ? `<div class="qs-row"><span class="ql">Frequency Discount</span><span class="qv" style="color:#00d97e;">−£${p.discount.toFixed(2)}</span></div>` : ''}
+            ${p.addons > 0 ? `<div class="qs-row"><span class="ql">Extras</span><span class="qv">+£${p.addons.toFixed(2)}</span></div>` : ''}
+            <div class="qs-total-row">
+                <span>Estimated Total</span>
+                <span class="total-val">£${p.total.toFixed(2)}</span>
+            </div>
+        `;
+    }
+
+    // ── Helpers ──
+    function generateRef() {
+        return 'MH-' + new Date().getFullYear() + '-' + Math.random().toString(36).substr(2,5).toUpperCase();
+    }
+
+    function toISO(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function formatDisplayDate(iso) {
+        if (!iso) return '';
+        const [y,m,d] = iso.split('-');
+        const date = new Date(y, m-1, d);
+        return date.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'long', year:'numeric' });
+    }
+
+    function formatTime(t) {
+        if (!t) return '';
+        const [h, m] = t.split(':').map(Number);
+        const ampm = h < 12 ? 'AM' : 'PM';
+        const h12  = h % 12 || 12;
+        return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+    }
+
+    function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function showToast(msg, type = 'error') {
+        const t = document.getElementById('toast');
+        t.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${msg}`;
+        t.className = 'toast show' + (type === 'error' ? '' : ' success');
+        setTimeout(() => t.classList.remove('show'), 5000);
+    }
+    </script>
+
+    <!-- Sidebar toggle (reuse from main site) -->
+    <script>
+    (function() {
+        const sidebar = document.querySelector('.sidebar');
+        const toggle  = document.querySelector('.mobile-menu-toggle');
+        if (toggle && sidebar) {
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                document.body.classList.toggle('sidebar-active');
+                const icon = toggle.querySelector('i');
+                if (icon) { icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-times'); }
+            });
+            document.addEventListener('click', e => {
+                if (window.innerWidth <= 991 && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                    document.body.classList.remove('sidebar-active');
+                    const icon = toggle.querySelector('i');
+                    if (icon) { icon.classList.remove('fa-times'); icon.classList.add('fa-bars'); }
+                }
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
