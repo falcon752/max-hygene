@@ -1294,27 +1294,33 @@
         };
 
         let emailSent = true;
-        try {
-            const resp = await fetch('send-booking.php', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ adminData: adminParams, clientData: clientParams })
-            });
-            const result = await resp.json();
-            if (!result.success) {
+        const isLocal = location.protocol === 'file:';
+
+        if (!isLocal) {
+            try {
+                const resp = await fetch('send-booking.php', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ adminData: adminParams, clientData: clientParams })
+                });
+                const result = await resp.json();
+                if (!result.success) {
+                    emailSent = false;
+                    console.warn('Mailer error:', result.error);
+                }
+            } catch (err) {
+                console.warn('Fetch error:', err);
                 emailSent = false;
-                console.warn('Mailer error:', result.error);
             }
-        } catch (err) {
-            console.warn('Fetch error:', err);
-            emailSent = false;
         }
 
         btn.classList.remove('loading');
         btn.disabled = false;
 
-        if (!emailSent) {
-            showToast('Could not send confirmation email. Your booking is noted — please call +44 7743173136 to confirm.', 'error');
+        if (isLocal) {
+            showToast('Demo mode — open via a PHP server for real emails.', 'info');
+        } else if (!emailSent) {
+            showToast('Could not send confirmation email. Please call +44 7743173136 to confirm.', 'error');
         }
 
         renderQuoteSummary(ref);
