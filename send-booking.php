@@ -14,10 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ── Gmail SMTP credentials ──
-const SMTP_HOST   = 'smtp.gmail.com';
-const SMTP_PORT   = 587;
-const SMTP_USER   = 'atikuquadrisegun@gmail.com';
-const SMTP_PASS   = 'qocgdwsmhdxtcqed';
+$env = parse_ini_file(__DIR__ . '/.env');
+define('SMTP_HOST', $env['SMTP_HOST']);
+define('SMTP_PORT', $env['SMTP_PORT']);
+define('SMTP_USER', $env['SMTP_USER']);
+define('SMTP_PASS', $env['SMTP_PASS']);
 const FROM_NAME   = 'Max-Hygiene Bookings';
 const ADMIN_EMAIL = 'atikuquadrisegun@gmail.com';
 
@@ -65,17 +66,6 @@ function smtp_send(string $to, string $toName, string $subject, string $html): a
     $w = fn($l) => fputs($conn, "$l\r\n");
 
     $r(); // 220 greeting
-
-    $w('EHLO ' . (gethostname() ?: 'localhost'));
-    while ($l = $r()) if ($l[3] === ' ') break;
-
-    $w('STARTTLS');
-    $r(); // 220
-
-    if (!@stream_socket_enable_crypto($conn, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-        fclose($conn);
-        return ['ok' => false, 'err' => 'TLS handshake failed'];
-    }
 
     $w('EHLO ' . (gethostname() ?: 'localhost'));
     while ($l = $r()) if ($l[3] === ' ') break;
