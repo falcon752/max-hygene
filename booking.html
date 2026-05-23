@@ -556,25 +556,6 @@
                         <div class="pill" data-val="other">Other</div>
                     </div>
 
-                    <!-- Bedrooms -->
-                    <div class="form-section-title" id="bedroomSection">Number of Bedrooms</div>
-                    <div class="option-pills" id="bedroomPills">
-                        <div class="pill active" data-val="1">1 Bed</div>
-                        <div class="pill" data-val="2">2 Beds</div>
-                        <div class="pill" data-val="3">3 Beds</div>
-                        <div class="pill" data-val="4">4 Beds</div>
-                        <div class="pill" data-val="5">5+ Beds</div>
-                    </div>
-
-                    <!-- Bathrooms -->
-                    <div class="form-section-title">Number of Bathrooms</div>
-                    <div class="option-pills" id="bathroomPills">
-                        <div class="pill active" data-val="1">1</div>
-                        <div class="pill" data-val="2">2</div>
-                        <div class="pill" data-val="3">3</div>
-                        <div class="pill" data-val="4">4+</div>
-                    </div>
-
                     <!-- Pricing Type -->
                     <div class="form-section-title">Pricing Type</div>
                     <div class="pricing-toggle-wrap">
@@ -585,6 +566,14 @@
                             <i class="fas fa-clock"></i> Hourly Rate
                         </button>
                     </div>
+
+                    <!-- Flat: room & task selection -->
+                    <div id="flatItemsSection">
+                        <div class="form-section-title" style="margin-top:1rem;">Rooms &amp; Tasks <span style="font-weight:400;color:#718096;">(select what you need)</span></div>
+                        <div class="addon-grid" id="flatItemsGrid"></div>
+                    </div>
+
+                    <!-- Hourly: hour selector -->
                     <div id="hourlyControls" style="display:none;">
                         <p style="font-size:.82rem;color:#718096;margin:.2rem 0 .6rem;">Estimated cleaning hours:</p>
                         <div class="hours-input-row">
@@ -594,13 +583,12 @@
                             <span class="hours-label">hrs &nbsp;×&nbsp; <strong id="rateLabel">£20/hr</strong></span>
                         </div>
                     </div>
-                    <div id="flatInfo" style="font-size:.82rem;color:#718096;margin:.4rem 0;">
-                        Flat rates are fixed prices based on property size.
-                    </div>
 
-                    <!-- Add-ons -->
-                    <div class="form-section-title">Extra Services <span style="font-weight:400;color:#718096;">(optional)</span></div>
-                    <div class="addon-grid" id="addonGrid"></div>
+                    <!-- Add-ons (flat rate only) -->
+                    <div id="extrasSection">
+                        <div class="form-section-title">Extra Services <span style="font-weight:400;color:#718096;">(optional)</span></div>
+                        <div class="addon-grid" id="addonGrid"></div>
+                    </div>
 
                     <div class="step-actions">
                         <button class="btn-back" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
@@ -807,55 +795,34 @@
 
     // ── Pricing data ──
     const SERVICES = [
-        {
-            id: 'residential', name: 'Residential Cleaning', icon: 'fas fa-home',
-            flat: { '1': 75, '2': 90, '3': 120, '4': 150, '5': 180 },
-            hourlyRate: 20, hasFlatRate: true,
-            priceTag: 'From £75 flat / £20 p/hr',
-            desc: 'Regular home cleaning'
-        },
-        {
-            id: 'office', name: 'Office Cleaning', icon: 'fas fa-building',
-            flat: null, hourlyRate: 22, hasFlatRate: false,
-            priceTag: '£22 per hour',
-            desc: 'Professional workspace cleaning'
-        },
-        {
-            id: 'deep', name: 'Deep Cleaning', icon: 'fas fa-broom',
-            flat: { '1': 140, '2': 170, '3': 220, '4': 270, '5': 320 },
-            hourlyRate: 25, hasFlatRate: true,
-            priceTag: 'From £140 flat / £25 p/hr',
-            desc: 'Intensive top-to-bottom clean'
-        },
-        {
-            id: 'moveout', name: 'Move-In / Move-Out', icon: 'fas fa-truck-moving',
-            flat: { '1': 170, '2': 210, '3': 260, '4': 310, '5': 360 },
-            hourlyRate: 25, hasFlatRate: true,
-            priceTag: 'From £170 flat / £25 p/hr',
-            desc: 'Full property ready for handover'
-        },
-        {
-            id: 'postconstruction', name: 'Post-Construction', icon: 'fas fa-hammer',
-            flat: null, hourlyRate: 28, hasFlatRate: false,
-            priceTag: '£28 per hour',
-            desc: 'Dust, debris & final polish'
-        },
-        {
-            id: 'event', name: 'Event Cleanup', icon: 'fas fa-glass-cheers',
-            flat: null, hourlyRate: 22, hasFlatRate: false,
-            priceTag: '£22 per hour',
-            desc: 'Before & after event cleaning'
-        }
+        { id: 'residential-standard', name: 'Residential Standard Clean', icon: 'fas fa-home',         hourlyRate: 18, desc: 'Regular home cleaning' },
+        { id: 'residential-deep',     name: 'Residential Deep Clean',     icon: 'fas fa-broom',        hourlyRate: 22, desc: 'Intensive top-to-bottom clean' },
+        { id: 'commercial',           name: 'Commercial Cleaning',         icon: 'fas fa-building',     hourlyRate: 22, desc: 'Professional workspace cleaning' },
+        { id: 'shortlet',             name: 'Short-let / Airbnb',          icon: 'fas fa-key',          hourlyRate: 20, desc: 'Property ready for next guests' },
+        { id: 'endoftenancy',         name: 'End of Tenancy Cleaning',     icon: 'fas fa-truck-moving', hourlyRate: 25, desc: 'Full property ready for handover' }
+    ];
+
+    // Flat-rate items: rooms + specific tasks (priced per item selected)
+    const FLAT_ITEMS = [
+        { id: 'bathroom',     name: 'Bathroom / Toilet',    price: 36, icon: 'fas fa-bath' },
+        { id: 'bedroom',      name: 'Bedroom',              price: 24, icon: 'fas fa-bed' },
+        { id: 'livingroom',   name: 'Living Room',          price: 36, icon: 'fas fa-couch' },
+        { id: 'kitchen',      name: 'Kitchen',              price: 30, icon: 'fas fa-utensils' },
+        { id: 'conservatory', name: 'Conservatory',         price: 24, icon: 'fas fa-sun' },
+        { id: 'hallway',      name: 'Hallway',              price: 15, icon: 'fas fa-door-open' },
+        { id: 'hood',         name: 'Steel Extractor Hood', price: 12, icon: 'fas fa-wind' },
+        { id: 'oven',         name: 'Oven Cleaning',        price: 36, icon: 'fas fa-fire' },
+        { id: 'windows',      name: 'Clean Inside Windows', price:  3, icon: 'fas fa-th' },
+        { id: 'cabinets',     name: 'Cleaning Cabinet',     price:  4, icon: 'fas fa-archive' },
+        { id: 'fridge',       name: 'Cleaning Fridge',      price: 12, icon: 'fas fa-snowflake' }
     ];
 
     const ADDONS = [
-        { id: 'oven',    name: 'Inside Oven Clean',    price: 25, icon: 'fas fa-fire' },
-        { id: 'fridge',  name: 'Inside Fridge Clean',  price: 15, icon: 'fas fa-snowflake' },
-        { id: 'cabinets',name: 'Inside Cabinets',       price: 20, icon: 'fas fa-door-open' },
-        { id: 'laundry', name: 'Laundry (wash & dry)', price: 20, icon: 'fas fa-tshirt' },
-        { id: 'ironing', name: 'Ironing Service',       price: 25, icon: 'fas fa-wind' },
-        { id: 'windows', name: 'Interior Windows',      price: 30, icon: 'fas fa-th' },
-        { id: 'carpet',  name: 'Carpet Steam Clean',    price: 40, icon: 'fas fa-couch' }
+        { id: 'products',  name: 'Cleaning Products',        price:  5, icon: 'fas fa-flask' },
+        { id: 'pet',       name: 'Home with Pet',            price:  6, icon: 'fas fa-paw' },
+        { id: 'vacuum',    name: 'Provide Vacuum',           price:  5, icon: 'fas fa-broom' },
+        { id: 'bedchange', name: 'Bed Changing & Cleaning',  price:  6, icon: 'fas fa-bed' },
+        { id: 'ironing',   name: 'Ironing (per hr)',         price: 22, icon: 'fas fa-tshirt' }
     ];
 
     const FREQUENCIES = [
@@ -872,9 +839,8 @@
         step: 1,
         service: null,
         propertyType: 'house',
-        bedrooms: '1',
-        bathrooms: '1',
         pricingType: 'flat',
+        flatItems: [],
         hours: 3,
         addons: [],
         frequency: 'oneTime',
@@ -893,13 +859,12 @@
         state.calYear  = now.getFullYear();
         state.calMonth = now.getMonth();
         renderServiceGrid();
+        renderFlatItemsGrid();
         renderAddonGrid();
         renderFrequencyGrid();
         renderCalendar();
         document.getElementById('current-year').textContent = now.getFullYear();
         initPillListeners('propertyTypePills', 'propertyType');
-        initPillListeners('bedroomPills',      'bedrooms');
-        initPillListeners('bathroomPills',     'bathrooms');
     });
 
     // ── Render service cards ──
@@ -910,7 +875,7 @@
                 <div class="svc-icon"><i class="${s.icon}"></i></div>
                 <div class="svc-name">${s.name}</div>
                 <div class="svc-desc" style="font-size:.75rem;color:#718096;margin:.2rem 0 .35rem;">${s.desc}</div>
-                <div class="svc-price-tag${!s.hasFlatRate ? ' hourly' : ''}">${s.priceTag}</div>
+                <div class="svc-price-tag hourly">£${s.hourlyRate}/hr · flat by room</div>
             </div>
         `).join('');
     }
@@ -918,23 +883,32 @@
     function selectService(id) {
         state.service = id;
         renderServiceGrid();
-        const svc = SERVICES.find(s => s.id === id);
-        if (svc && !svc.hasFlatRate) {
-            state.pricingType = 'hourly';
-            document.getElementById('btnFlat').classList.remove('active');
-            document.getElementById('btnHourly').classList.add('active');
-            document.getElementById('hourlyControls').style.display = 'block';
-            document.getElementById('flatInfo').style.display = 'none';
-            document.getElementById('btnFlat').disabled = true;
-            document.getElementById('btnFlat').style.opacity = '.45';
-        } else {
-            document.getElementById('btnFlat').disabled = false;
-            document.getElementById('btnFlat').style.opacity = '1';
-        }
         updateRateLabel();
         calculatePrice();
         updatePricePanel();
         document.getElementById('hint1').classList.remove('show');
+    }
+
+    // ── Flat items (room/task selection for flat-rate mode) ──
+    function renderFlatItemsGrid() {
+        document.getElementById('flatItemsGrid').innerHTML = FLAT_ITEMS.map(item => `
+            <label class="addon-item${state.flatItems.includes(item.id) ? ' selected' : ''}" onclick="toggleFlatItem('${item.id}')">
+                <input type="checkbox" ${state.flatItems.includes(item.id) ? 'checked' : ''} onclick="event.stopPropagation()">
+                <div class="addon-info">
+                    <div class="addon-name"><i class="${item.icon}" style="margin-right:.3rem;color:#3bb0bd;"></i>${item.name}</div>
+                    <div class="addon-price">£${item.price}</div>
+                </div>
+            </label>
+        `).join('');
+    }
+
+    function toggleFlatItem(id) {
+        const idx = state.flatItems.indexOf(id);
+        if (idx > -1) state.flatItems.splice(idx, 1);
+        else state.flatItems.push(id);
+        renderFlatItemsGrid();
+        calculatePrice();
+        updatePricePanel();
     }
 
     // ── Render addons ──
@@ -979,13 +953,11 @@
 
     // ── Pricing type toggle ──
     function setPricingType(type) {
-        const svc = SERVICES.find(s => s.id === state.service);
-        if (svc && !svc.hasFlatRate && type === 'flat') return;
         state.pricingType = type;
         document.getElementById('btnFlat').classList.toggle('active', type === 'flat');
         document.getElementById('btnHourly').classList.toggle('active', type === 'hourly');
-        document.getElementById('hourlyControls').style.display = type === 'hourly' ? 'block' : 'none';
-        document.getElementById('flatInfo').style.display       = type === 'flat'   ? 'block' : 'none';
+        document.getElementById('hourlyControls').style.display    = type === 'hourly' ? 'block' : 'none';
+        document.getElementById('flatItemsSection').style.display  = type === 'flat'   ? 'block' : 'none';
         calculatePrice();
         updatePricePanel();
     }
@@ -1018,14 +990,15 @@
     // ── Price calculator ──
     function calculatePrice() {
         const svc = SERVICES.find(s => s.id === state.service);
-        if (!svc) { state.prices = { base: 0, addons: 0, discount: 0, total: 0, isQuote: false }; return; }
+        if (!svc) { state.prices = { base: 0, addons: 0, discount: 0, total: 0 }; return; }
 
         let base = 0;
-        const isQuote = false;
 
-        if (state.pricingType === 'flat' && svc.hasFlatRate) {
-            const key = parseInt(state.bedrooms) >= 5 ? '5' : state.bedrooms;
-            base = svc.flat[key] || svc.flat['1'];
+        if (state.pricingType === 'flat') {
+            base = state.flatItems.reduce((sum, id) => {
+                const item = FLAT_ITEMS.find(x => x.id === id);
+                return sum + (item ? item.price : 0);
+            }, 0);
         } else {
             base = svc.hourlyRate * state.hours;
         }
@@ -1039,7 +1012,7 @@
         const discount = freqObj ? base * freqObj.discount : 0;
 
         const total = (base - discount) + addonsTotal;
-        state.prices = { base, addons: addonsTotal, discount, total, isQuote };
+        state.prices = { base, addons: addonsTotal, discount, total };
     }
 
     // ── Price panel ──
@@ -1059,8 +1032,15 @@
         let html = '';
         html += `<div class="panel-row"><span class="label">${svc.name}</span><span class="value"></span></div>`;
 
-        if (state.pricingType === 'flat' && svc.hasFlatRate) {
-            html += `<div class="panel-row"><span class="label">Flat Rate (${state.bedrooms} bed)</span><span class="value">£${p.base.toFixed(2)}</span></div>`;
+        if (state.pricingType === 'flat') {
+            if (state.flatItems.length === 0) {
+                html += `<div class="panel-row"><span class="label" style="color:#718096;font-style:italic;">Select rooms &amp; tasks above</span><span class="value"></span></div>`;
+            } else {
+                state.flatItems.forEach(id => {
+                    const item = FLAT_ITEMS.find(x => x.id === id);
+                    if (item) html += `<div class="panel-row"><span class="label">${item.name}</span><span class="value">£${item.price.toFixed(2)}</span></div>`;
+                });
+            }
         } else {
             html += `<div class="panel-row"><span class="label">${state.hours} hrs × £${svc.hourlyRate}</span><span class="value">£${p.base.toFixed(2)}</span></div>`;
         }
@@ -1079,7 +1059,7 @@
         if (state.pricingType === 'hourly') {
             html += `<div class="panel-note"><i class="fas fa-info-circle" style="color:#3bb0bd;margin-right:.3rem;"></i>Hourly rate. Final amount billed after the clean based on actual hours worked.</div>`;
         } else {
-            html += `<div class="panel-note"><i class="fas fa-info-circle" style="color:#3bb0bd;margin-right:.3rem;"></i>Flat rate. Final price confirmed with you before the clean.</div>`;
+            html += `<div class="panel-note"><i class="fas fa-info-circle" style="color:#3bb0bd;margin-right:.3rem;"></i>Flat rate. Price based on selected rooms &amp; tasks.</div>`;
         }
 
         if (state.date) {
@@ -1277,8 +1257,9 @@
             special_notes:     state.contact.notes || 'None',
             booking_ref:       ref,
             property_type:     state.propertyType,
-            bedrooms:          state.bedrooms,
-            bathrooms:         state.bathrooms
+            rooms_selected:    state.pricingType === 'flat'
+                ? (state.flatItems.map(id => FLAT_ITEMS.find(x => x.id === id)?.name).filter(Boolean).join(', ') || 'None')
+                : 'N/A (hourly)'
         };
 
         const clientParams = {
@@ -1360,18 +1341,22 @@
         document.getElementById('bookingRefDisplay').textContent = ref;
         document.getElementById('clientEmailDisplay').textContent = state.contact.email;
 
+        const flatItemsStr = state.pricingType === 'flat'
+            ? (state.flatItems.map(id => FLAT_ITEMS.find(x => x.id === id)?.name).filter(Boolean).join(', ') || '—')
+            : null;
+
         document.getElementById('quoteSummaryCard').innerHTML = `
             <div class="qs-title"><i class="fas fa-clipboard-list" style="color:#3bb0bd;margin-right:.5rem;"></i>Booking Summary</div>
             <div class="qs-row"><span class="ql">Service</span><span class="qv">${svc?.name}</span></div>
-            <div class="qs-row"><span class="ql">Property</span><span class="qv">${capitalise(state.propertyType)}, ${state.bedrooms} bed / ${state.bathrooms} bath</span></div>
-            <div class="qs-row"><span class="ql">Date & Time</span><span class="qv">${formatDisplayDate(state.date)} at ${formatTime(state.timeSlot)}</span></div>
+            <div class="qs-row"><span class="ql">Property</span><span class="qv">${capitalise(state.propertyType)}</span></div>
+            <div class="qs-row"><span class="ql">Date &amp; Time</span><span class="qv">${formatDisplayDate(state.date)} at ${formatTime(state.timeSlot)}</span></div>
             <div class="qs-row"><span class="ql">Frequency</span><span class="qv">${freq?.label}</span></div>
             <div class="qs-row"><span class="ql">Pricing Type</span><span class="qv">${state.pricingType === 'flat' ? 'Flat Rate' : 'Hourly Rate'}</span></div>
-            ${state.pricingType === 'hourly' ? `<div class="qs-row"><span class="ql">Est. Hours</span><span class="qv">${state.hours} hrs</span></div>` : ''}
+            ${state.pricingType === 'flat' ? `<div class="qs-row"><span class="ql">Rooms &amp; Tasks</span><span class="qv">${flatItemsStr}</span></div>` : `<div class="qs-row"><span class="ql">Est. Hours</span><span class="qv">${state.hours} hrs</span></div>`}
             <div class="qs-row"><span class="ql">Extras</span><span class="qv">${addonsStr}</span></div>
             <div class="qs-row"><span class="ql">Base Price</span><span class="qv">£${p.base.toFixed(2)}</span></div>
             ${p.discount > 0 ? `<div class="qs-row"><span class="ql">Frequency Discount</span><span class="qv" style="color:#00d97e;">−£${p.discount.toFixed(2)}</span></div>` : ''}
-            ${p.addons > 0 ? `<div class="qs-row"><span class="ql">Extras</span><span class="qv">+£${p.addons.toFixed(2)}</span></div>` : ''}
+            ${p.addons > 0 ? `<div class="qs-row"><span class="ql">Extras Total</span><span class="qv">+£${p.addons.toFixed(2)}</span></div>` : ''}
             <div class="qs-total-row">
                 <span>Estimated Total</span>
                 <span class="total-val">£${p.total.toFixed(2)}</span>

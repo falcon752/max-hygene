@@ -5,6 +5,7 @@
  */
 
 header('Content-Type: application/json');
+error_reporting(0); // Suppress warnings that corrupt JSON response
 
 // ── Reject non-POST ──
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -38,6 +39,9 @@ $client = $data['clientData'];
 // ── Send admin notification ──
 $adminSubject  = 'New Booking: ' . c($admin['service_name']) . ' — ' . c($admin['from_name']);
 $adminResult   = smtp_send(ADMIN_EMAIL, FROM_NAME, $adminSubject, buildAdminEmail($admin));
+
+// Add a delay to prevent Gmail from dropping rapid consecutive connections
+sleep(2);
 
 // ── Send client confirmation ──
 $clientSubject = 'Your Max-Hygiene Booking — ' . c($client['booking_ref']);
