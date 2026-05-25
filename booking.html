@@ -161,9 +161,11 @@
         .svc-card.selected .svc-icon,
         .svc-card:hover .svc-icon { background: #3bb0bd; color: #fff; }
         .svc-name { font-weight: 600; font-size: .95rem; color: #2d3748; margin-bottom: .25rem; }
-        .svc-price-tag { font-size: .78rem; color: #3bb0bd; font-weight: 600; }
+        .svc-price-tag { font-size: .78rem; color: #3bb0bd; font-weight: 600; display: none; }
         .svc-price-tag.hourly { color: #718096; }
         .price-data { display: none; }
+        .flat-item-price { display: none; }
+        .addon-price { display: none; }
 
         /* Form sections */
         .form-section-title {
@@ -240,6 +242,90 @@
         .addon-info { flex: 1; }
         .addon-name { font-size: .83rem; font-weight: 500; color: #2d3748; }
         .addon-price { font-size: .78rem; color: #3bb0bd; font-weight: 600; }
+
+        /* Flat-item (room/task) cards */
+        #flatItemsGrid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+        .flat-item-card {
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            padding: 1rem .75rem; cursor: pointer; background: #fff;
+            transition: all .25s; text-align: center; position: relative;
+        }
+        .flat-item-card:hover { border-color: #3bb0bd; background: #f0fbfc; transform: translateY(-2px); }
+        .flat-item-card.selected { border-color: #3bb0bd; background: #e8f7f8; box-shadow: 0 0 0 3px rgba(59,176,189,.12); }
+        .flat-item-icon {
+            width: 44px; height: 44px; background: rgba(59,176,189,.1);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.15rem; color: #3bb0bd; margin: 0 auto .65rem; transition: all .25s;
+        }
+        .flat-item-card.selected .flat-item-icon { background: #3bb0bd; color: #fff; }
+        .flat-item-name  { font-size: .8rem; font-weight: 600; color: #2d3748; margin-bottom: .2rem; line-height: 1.3; }
+        .flat-item-price { font-size: .72rem; color: #718096; }
+        .flat-item-qty-badge {
+            position: absolute; top: 6px; right: 6px;
+            background: #3bb0bd; color: #fff;
+            font-size: .68rem; font-weight: 700;
+            padding: .12rem .42rem; border-radius: 20px; line-height: 1.5;
+        }
+        .flat-item-add { position: absolute; top: 7px; right: 8px; color: #d0d9e2; font-size: .78rem; transition: color .2s; }
+        .flat-item-card:hover .flat-item-add { color: #3bb0bd; }
+
+        /* Qty selection modal */
+        .qty-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.48);
+            z-index: 9000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .22s; padding: 20px;
+        }
+        .qty-modal-overlay.open { opacity: 1; pointer-events: all; }
+        .qty-modal {
+            background: #fff; border-radius: 18px; padding: 1.8rem 1.6rem;
+            max-width: 310px; width: 100%; text-align: center; position: relative;
+            transform: scale(.94) translateY(10px); transition: transform .22s;
+            box-shadow: 0 24px 64px rgba(0,0,0,.18);
+        }
+        .qty-modal-overlay.open .qty-modal { transform: scale(1) translateY(0); }
+        .qty-modal-close {
+            position: absolute; top: 12px; right: 14px;
+            background: none; border: none; font-size: 1.3rem;
+            color: #a0aec0; cursor: pointer; line-height: 1; transition: color .2s;
+        }
+        .qty-modal-close:hover { color: #2d3748; }
+        .qty-m-icon {
+            width: 56px; height: 56px; background: rgba(59,176,189,.12); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem; color: #3bb0bd; margin: 0 auto .9rem;
+        }
+        .qty-m-title { font-size: 1.05rem; font-weight: 700; color: #2d3748; margin-bottom: .2rem; }
+        .qty-m-unit  { font-size: .8rem; color: #718096; margin-bottom: 1.1rem; }
+        .qty-stepper { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: .55rem; }
+        .qty-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e2e8f0;
+            background: #fff; cursor: pointer; font-size: 1.15rem; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            color: #3bb0bd; transition: all .2s;
+        }
+        .qty-btn:hover { background: #3bb0bd; color: #fff; border-color: #3bb0bd; }
+        .qty-value   { font-size: 2.1rem; font-weight: 700; color: #2d3748; min-width: 46px; }
+        .qty-subtotal { font-size: .88rem; font-weight: 600; color: #3bb0bd; margin-bottom: 1.3rem; min-height: 1.2rem; }
+        .qty-btn-remove {
+            width: 100%; padding: .52rem; background: none; border: 1.5px solid #fc5c7d;
+            border-radius: 8px; color: #fc5c7d; cursor: pointer; font-size: .8rem; font-weight: 500;
+            transition: all .2s; font-family: 'Poppins', sans-serif; margin-bottom: .6rem;
+        }
+        .qty-btn-remove:hover { background: #fc5c7d; color: #fff; }
+        .qty-modal-actions { display: flex; gap: .55rem; }
+        .qty-btn-cancel {
+            flex: 1; padding: .62rem; border: 1.5px solid #e2e8f0; border-radius: 8px;
+            background: #fff; cursor: pointer; font-size: .875rem; color: #4a5568;
+            transition: all .2s; font-family: 'Poppins', sans-serif;
+        }
+        .qty-btn-cancel:hover { border-color: #3bb0bd; color: #3bb0bd; }
+        .qty-btn-confirm {
+            flex: 1; padding: .62rem; background: #3bb0bd; color: #fff;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-size: .875rem; font-weight: 600;
+            transition: all .2s; font-family: 'Poppins', sans-serif;
+        }
+        .qty-btn-confirm:hover { background: #2a9ba7; }
 
         /* Frequency */
         .frequency-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: .75rem; }
@@ -788,6 +874,27 @@
         </footer>
     </main>
 
+    <!-- Qty Modal -->
+    <div class="qty-modal-overlay" id="qtyModalOverlay" onclick="handleOverlayClick(event)">
+        <div class="qty-modal">
+            <button class="qty-modal-close" onclick="closeQtyModal()">&#215;</button>
+            <div class="qty-m-icon"   id="qtyMIcon"></div>
+            <div class="qty-m-title"  id="qtyMTitle"></div>
+            <div class="qty-m-unit"   id="qtyMUnit"></div>
+            <div class="qty-stepper">
+                <button class="qty-btn" onclick="changeQty(-1)">&#8722;</button>
+                <div class="qty-value" id="qtyValue">1</div>
+                <button class="qty-btn" onclick="changeQty(1)">&#43;</button>
+            </div>
+            <div class="qty-subtotal" id="qtySubtotal"></div>
+            <button class="qty-btn-remove" id="qtyBtnRemove" onclick="removeQtyItem()">&#128465; Remove from booking</button>
+            <div class="qty-modal-actions">
+                <button class="qty-btn-cancel"  onclick="closeQtyModal()">Cancel</button>
+                <button class="qty-btn-confirm" onclick="confirmQty()">Add to Booking</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -841,7 +948,7 @@
         service: null,
         propertyType: 'house',
         pricingType: 'flat',
-        flatItems: [],
+        flatItems: {},   // { id: quantity }
         hours: 3,
         addons: [],
         frequency: 'oneTime',
@@ -890,26 +997,81 @@
         document.getElementById('hint1').classList.remove('show');
     }
 
-    // ── Flat items (room/task selection for flat-rate mode) ──
+    // ── Flat items (room/task selection with qty modal) ──
     function renderFlatItemsGrid() {
-        document.getElementById('flatItemsGrid').innerHTML = FLAT_ITEMS.map(item => `
-            <label class="addon-item${state.flatItems.includes(item.id) ? ' selected' : ''}" onclick="toggleFlatItem('${item.id}')">
-                <input type="checkbox" ${state.flatItems.includes(item.id) ? 'checked' : ''} onclick="event.stopPropagation()">
-                <div class="addon-info">
-                    <div class="addon-name"><i class="${item.icon}" style="margin-right:.3rem;color:#3bb0bd;"></i>${item.name}</div>
-                    <div class="addon-price price-data" data-price="${item.price}">£${item.price}</div>
-                </div>
-            </label>
-        `).join('');
+        document.getElementById('flatItemsGrid').innerHTML = FLAT_ITEMS.map(item => {
+            const qty = state.flatItems[item.id] || 0;
+            const sel = qty > 0;
+            return `
+            <div class="flat-item-card${sel ? ' selected' : ''}" onclick="openQtyModal('${item.id}')">
+                <div class="flat-item-icon"><i class="${item.icon}"></i></div>
+                <div class="flat-item-name">${item.name}</div>
+                <div class="flat-item-price">£${item.price} each</div>
+                ${sel
+                    ? `<div class="flat-item-qty-badge">&times;${qty}</div>`
+                    : `<div class="flat-item-add"><i class="fas fa-plus-circle"></i></div>`
+                }
+            </div>`;
+        }).join('');
     }
 
-    function toggleFlatItem(id) {
-        const idx = state.flatItems.indexOf(id);
-        if (idx > -1) state.flatItems.splice(idx, 1);
-        else state.flatItems.push(id);
+    // ── Qty modal ──
+    let _qtyId  = null;
+    let _qtyVal = 1;
+
+    function openQtyModal(id) {
+        const item = FLAT_ITEMS.find(x => x.id === id);
+        if (!item) return;
+        _qtyId  = id;
+        _qtyVal = state.flatItems[id] || 1;
+
+        document.getElementById('qtyMIcon').innerHTML    = `<i class="${item.icon}"></i>`;
+        document.getElementById('qtyMTitle').textContent = item.name;
+        document.getElementById('qtyMUnit').textContent  = `£${item.price} per item`;
+        document.getElementById('qtyBtnRemove').style.display = state.flatItems[id] ? 'block' : 'none';
+        _refreshQtyDisplay(item);
+
+        document.getElementById('qtyModalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeQtyModal() {
+        document.getElementById('qtyModalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+        _qtyId = null;
+    }
+
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById('qtyModalOverlay')) closeQtyModal();
+    }
+
+    function changeQty(delta) {
+        _qtyVal = Math.max(1, Math.min(20, _qtyVal + delta));
+        _refreshQtyDisplay(FLAT_ITEMS.find(x => x.id === _qtyId));
+    }
+
+    function _refreshQtyDisplay(item) {
+        if (!item) return;
+        document.getElementById('qtyValue').textContent    = _qtyVal;
+        document.getElementById('qtySubtotal').textContent = `${_qtyVal} × £${item.price} = £${(_qtyVal * item.price).toFixed(2)}`;
+    }
+
+    function confirmQty() {
+        if (!_qtyId) return;
+        state.flatItems[_qtyId] = _qtyVal;
         renderFlatItemsGrid();
         calculatePrice();
         updatePricePanel();
+        closeQtyModal();
+    }
+
+    function removeQtyItem() {
+        if (!_qtyId) return;
+        delete state.flatItems[_qtyId];
+        renderFlatItemsGrid();
+        calculatePrice();
+        updatePricePanel();
+        closeQtyModal();
     }
 
     // ── Render addons ──
@@ -961,6 +1123,8 @@
         document.getElementById('flatItemsSection').style.display = type === 'flat'   ? 'block' : 'none';
         document.getElementById('extrasSection').style.display    = type === 'flat'   ? 'block' : 'none';
         if (type === 'hourly') {
+            state.flatItems = {};
+            renderFlatItemsGrid();
             state.addons = [];
             renderAddonGrid();
         }
@@ -1001,9 +1165,9 @@
         let base = 0;
 
         if (state.pricingType === 'flat') {
-            base = state.flatItems.reduce((sum, id) => {
+            base = Object.entries(state.flatItems).reduce((sum, [id, qty]) => {
                 const item = FLAT_ITEMS.find(x => x.id === id);
-                return sum + (item ? item.price : 0);
+                return sum + (item ? item.price * qty : 0);
             }, 0);
         } else {
             base = svc.hourlyRate * state.hours;
@@ -1039,12 +1203,13 @@
         html += `<div class="panel-row"><span class="label">${svc.name}</span><span class="value"></span></div>`;
 
         if (state.pricingType === 'flat') {
-            if (state.flatItems.length === 0) {
+            const entries = Object.entries(state.flatItems);
+            if (entries.length === 0) {
                 html += `<div class="panel-row"><span class="label" style="color:#718096;font-style:italic;">Select rooms &amp; tasks above</span><span class="value"></span></div>`;
             } else {
-                state.flatItems.forEach(id => {
+                entries.forEach(([id, qty]) => {
                     const item = FLAT_ITEMS.find(x => x.id === id);
-                    if (item) html += `<div class="panel-row"><span class="label">${item.name}</span><span class="value">£${item.price.toFixed(2)}</span></div>`;
+                    if (item) html += `<div class="panel-row"><span class="label">${item.name} &times;${qty}</span><span class="value">£${(item.price * qty).toFixed(2)}</span></div>`;
                 });
             }
         } else {
@@ -1264,7 +1429,10 @@
             booking_ref:       ref,
             property_type:     state.propertyType,
             rooms_selected:    state.pricingType === 'flat'
-                ? (state.flatItems.map(id => FLAT_ITEMS.find(x => x.id === id)?.name).filter(Boolean).join(', ') || 'None')
+                ? (Object.entries(state.flatItems).map(([id, qty]) => {
+                    const x = FLAT_ITEMS.find(i => i.id === id);
+                    return x ? `${x.name} ×${qty} (£${(x.price * qty).toFixed(2)})` : '';
+                  }).filter(Boolean).join(', ') || 'None')
                 : 'N/A (hourly)'
         };
 
@@ -1347,9 +1515,12 @@
         document.getElementById('bookingRefDisplay').textContent = ref;
         document.getElementById('clientEmailDisplay').textContent = state.contact.email;
 
-        const flatItemsStr = state.pricingType === 'flat'
-            ? (state.flatItems.map(id => FLAT_ITEMS.find(x => x.id === id)?.name).filter(Boolean).join(', ') || '—')
-            : null;
+        const flatItemsRows = state.pricingType === 'flat'
+            ? Object.entries(state.flatItems).map(([id, qty]) => {
+                const x = FLAT_ITEMS.find(i => i.id === id);
+                return x ? `<div class="qs-row"><span class="ql">${x.name}</span><span class="qv">&times;${qty} &mdash; £${(x.price * qty).toFixed(2)}</span></div>` : '';
+              }).filter(Boolean).join('')
+            : `<div class="qs-row"><span class="ql">Est. Hours</span><span class="qv">${state.hours} hrs</span></div>`;
 
         document.getElementById('quoteSummaryCard').innerHTML = `
             <div class="qs-title"><i class="fas fa-clipboard-list" style="color:#3bb0bd;margin-right:.5rem;"></i>Booking Summary</div>
@@ -1357,10 +1528,10 @@
             <div class="qs-row"><span class="ql">Property</span><span class="qv">${capitalise(state.propertyType)}</span></div>
             <div class="qs-row"><span class="ql">Date &amp; Time</span><span class="qv">${formatDisplayDate(state.date)} at ${formatTime(state.timeSlot)}</span></div>
             <div class="qs-row"><span class="ql">Frequency</span><span class="qv">${freq?.label}</span></div>
-            <div class="qs-row"><span class="ql">Pricing Type</span><span class="qv">${state.pricingType === 'flat' ? 'Flat Rate' : 'Hourly Rate'}</span></div>
-            ${state.pricingType === 'flat' ? `<div class="qs-row"><span class="ql">Rooms &amp; Tasks</span><span class="qv">${flatItemsStr}</span></div>` : `<div class="qs-row"><span class="ql">Est. Hours</span><span class="qv">${state.hours} hrs</span></div>`}
-            <div class="qs-row"><span class="ql">Extras</span><span class="qv">${addonsStr}</span></div>
-            <div class="qs-row"><span class="ql">Base Price</span><span class="qv">£${p.base.toFixed(2)}</span></div>
+            <div class="qs-row"><span class="ql">Pricing</span><span class="qv">${state.pricingType === 'flat' ? 'Flat Rate' : 'Hourly Rate'}</span></div>
+            ${flatItemsRows}
+            ${addonsStr !== '—' ? `<div class="qs-row"><span class="ql">Extras</span><span class="qv">${addonsStr}</span></div>` : ''}
+            <div class="qs-row"><span class="ql">Subtotal</span><span class="qv">£${p.base.toFixed(2)}</span></div>
             ${p.discount > 0 ? `<div class="qs-row"><span class="ql">Frequency Discount</span><span class="qv" style="color:#00d97e;">−£${p.discount.toFixed(2)}</span></div>` : ''}
             ${p.addons > 0 ? `<div class="qs-row"><span class="ql">Extras Total</span><span class="qv">+£${p.addons.toFixed(2)}</span></div>` : ''}
             <div class="qs-total-row">
