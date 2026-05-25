@@ -163,6 +163,7 @@
         .svc-name { font-weight: 600; font-size: .95rem; color: #2d3748; margin-bottom: .25rem; }
         .svc-price-tag { font-size: .78rem; color: #3bb0bd; font-weight: 600; }
         .svc-price-tag.hourly { color: #718096; }
+        .price-data { display: none; }
 
         /* Form sections */
         .form-section-title {
@@ -875,7 +876,7 @@
                 <div class="svc-icon"><i class="${s.icon}"></i></div>
                 <div class="svc-name">${s.name}</div>
                 <div class="svc-desc" style="font-size:.75rem;color:#718096;margin:.2rem 0 .35rem;">${s.desc}</div>
-                <div class="svc-price-tag hourly">£${s.hourlyRate}/hr · flat by room</div>
+                <div class="svc-price-tag hourly price-data" data-rate="${s.hourlyRate}">£${s.hourlyRate}/hr</div>
             </div>
         `).join('');
     }
@@ -896,7 +897,7 @@
                 <input type="checkbox" ${state.flatItems.includes(item.id) ? 'checked' : ''} onclick="event.stopPropagation()">
                 <div class="addon-info">
                     <div class="addon-name"><i class="${item.icon}" style="margin-right:.3rem;color:#3bb0bd;"></i>${item.name}</div>
-                    <div class="addon-price">£${item.price}</div>
+                    <div class="addon-price price-data" data-price="${item.price}">£${item.price}</div>
                 </div>
             </label>
         `).join('');
@@ -918,7 +919,7 @@
                 <input type="checkbox" ${state.addons.includes(a.id) ? 'checked' : ''} onclick="event.stopPropagation()">
                 <div class="addon-info">
                     <div class="addon-name"><i class="${a.icon}" style="margin-right:.3rem;color:#3bb0bd;"></i>${a.name}</div>
-                    <div class="addon-price">+£${a.price}</div>
+                    <div class="addon-price price-data" data-price="${a.price}">+£${a.price}</div>
                 </div>
             </label>
         `).join('');
