@@ -29,10 +29,14 @@ export interface QuoteEmailInput {
     minutes: number;
     hours: number;
     subtotal: number;
+    discountAmount?: number;
+    discountedSubtotal?: number;
     tax: number;
     grand: number;
   };
   lines: QuoteLineInput[];
+  discount?: number;
+  manualTotalHours?: string;
 }
 
 const difficultyLabels: Record<QuoteDifficulty, string> = {
@@ -95,12 +99,12 @@ export const generateQuotePdf = (quote: QuoteEmailInput): Promise<Buffer> =>
       .fillColor('#2d3748')
       .font('Helvetica-Bold')
       .fontSize(21)
-      .text('Max-Hygiene Ltd', 112, 48)
+      .text('Max hygiene cleaning services', 112, 48)
       .font('Helvetica')
       .fontSize(9)
       .fillColor('#4a5568')
-      .text('Professional cleaning services across Scotland', 112, 76)
-      .text('info@max-hygienecleaningpro.co.uk | 0333 335 7932', 112, 91);
+      .text('local cleaner near you.', 112, 76)
+      .text('Technology House Newton Place\nPost code: G3 7PR\n(07743173136) | info@max-hygiencleaningpro.co.uk', 112, 91, { lineGap: 2 });
 
     doc
       .font('Helvetica-Bold')
@@ -113,32 +117,32 @@ export const generateQuotePdf = (quote: QuoteEmailInput): Promise<Buffer> =>
       .text(safe(quote.quoteRef, 'Draft Quote'), 390, 72, { width: 163, align: 'right' })
       .text(new Date(quote.quoteDate || Date.now()).toLocaleDateString('en-GB'), 390, 88, { width: 163, align: 'right' });
 
-    doc.moveTo(42, 126).lineTo(553, 126).strokeColor('#e2e8f0').lineWidth(1).stroke();
+    doc.moveTo(42, 140).lineTo(553, 140).strokeColor('#e2e8f0').lineWidth(1).stroke();
 
     doc
       .font('Helvetica-Bold')
       .fontSize(8)
       .fillColor('#718096')
-      .text('PREPARED FOR', 42, 148)
-      .text('PROPERTY', 310, 148);
+      .text('PREPARED FOR', 42, 160)
+      .text('PROPERTY', 310, 160);
 
     doc
       .font('Helvetica-Bold')
       .fontSize(12)
       .fillColor('#2d3748')
-      .text(safe(quote.clientName, 'Client Name'), 42, 164, { width: 220 })
+      .text(safe(quote.clientName, 'Client Name'), 42, 176, { width: 220 })
       .font('Helvetica')
       .fontSize(9)
       .fillColor('#4a5568')
-      .text(safe(quote.clientEmail, 'client@email.com'), 42, 184, { width: 220 })
-      .text(safe(quote.clientPhone, 'Client phone'), 42, 199, { width: 220 })
-      .text(safe(quote.jobAddress, 'Property address'), 310, 164, { width: 240 });
+      .text(safe(quote.clientEmail, 'client@email.com'), 42, 196, { width: 220 })
+      .text(safe(quote.clientPhone, 'Client phone'), 42, 211, { width: 220 })
+      .text(safe(quote.jobAddress, 'Property address'), 310, 176, { width: 240 });
 
     doc
       .font('Helvetica-Bold')
       .fontSize(14)
       .fillColor('#2d3748')
-      .text('Quote Summary', 42, 242)
+      .text('Quote Summary', 42, 254)
       .font('Helvetica')
       .fontSize(9)
       .fillColor('#4a5568')
@@ -148,16 +152,16 @@ export const generateQuotePdf = (quote: QuoteEmailInput): Promise<Buffer> =>
           'Thank you for the opportunity to quote for this job. We look forward to working with you.'
         ),
         42,
-        264,
+        276,
         { width: 511, lineGap: 3 }
       );
 
-    let y = Math.max(doc.y + 22, 320);
+    let y = Math.max(doc.y + 22, 330);
     drawRow(
       doc,
       y,
       [
-        { text: 'DESCRIPTION', x: 54, width: 300 },
+        { text: 'SERVICE TYPE', x: 54, width: 300 },
         { text: 'QTY', x: 380, width: 50 },
         { text: 'TOTAL', x: 472, width: 68, align: 'right' },
       ],
@@ -182,10 +186,17 @@ export const generateQuotePdf = (quote: QuoteEmailInput): Promise<Buffer> =>
     y += 16;
     const totalsX = 42;
     const totalValueX = 440;
-    const totalRows = [
-      ['Net', formatCurrency(quote.totals.subtotal)],
-      [`VAT / Tax (${quote.taxRate || 0}%)`, formatCurrency(quote.totals.tax)],
+    const totalRows: Array<[string, string]> = [
+      ['Net', formatCurrency(quote.totals.subtotal)]
     ];
+    if (quote.discount && quote.totals.discountAmount) {
+      totalRows.push([`Discount (${quote.discount}%)`, `-${formatCurrency(quote.totals.discountAmount)}`]);
+    }
+    totalRows.push([`VAT / Tax (${quote.taxRate || 0}%)`, formatCurrency(quote.totals.tax)]);
+    
+    if (quote.manualTotalHours) {
+      totalRows.push(['Total Hours', quote.manualTotalHours]);
+    }
 
     totalRows.forEach(([label, value]) => {
       if (y > 730) {
@@ -214,7 +225,11 @@ export const generateQuotePdf = (quote: QuoteEmailInput): Promise<Buffer> =>
       .fontSize(9)
       .fillColor('#4a5568')
       .text(`This quote is valid for ${quote.validDays || 30} days.`, 42, y)
-      .text('Invoices can be paid by BACS, Direct Debit, or agreed payment method.', 42, y + 17);
+      .text('Invoices can be paid by BACS, Direct Debit, or agreed payment method.', 42, y + 15)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .fillColor('#3bb0bd')
+      .text('Spotless Homes. Zero Stress', 42, y + 35);
 
     doc.end();
   });

@@ -77,3 +77,10 @@
     padding: 20px 16px;
   }
 }
+
+/* ── Print adjustments ── */
+@media print {
+  .mobileHeader {
+    display: none !important;
+  }
+}
