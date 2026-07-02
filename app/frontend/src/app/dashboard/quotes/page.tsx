@@ -286,6 +286,50 @@ export default function QuotesPage() {
     showToast('Local draft cleared');
   };
 
+  const validateForm = () => {
+    if (!clientName.trim()) {
+      showToast('Client Name is required');
+      return false;
+    }
+    if (!clientEmail.trim()) {
+      showToast('Client Email is required');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(clientEmail)) {
+      showToast('Invalid Email format');
+      return false;
+    }
+    if (!clientPhone.trim()) {
+      showToast('Client Phone is required');
+      return false;
+    }
+    const phoneRegex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/;
+    if (!phoneRegex.test(clientPhone)) {
+      showToast('Invalid Phone number format');
+      return false;
+    }
+    return true;
+  };
+
+  const handlePrintQuote = () => {
+    if (lines.length === 0) {
+      showToast('Add quote lines before downloading');
+      return;
+    }
+    if (!validateForm()) return;
+    printQuote();
+  };
+
+  const handleOpenShare = () => {
+    if (lines.length === 0) {
+      showToast('Add quote lines before sharing');
+      return;
+    }
+    if (!validateForm()) return;
+    openShare();
+  };
+
   const showToast = (message: string) => {
     setToast(message);
     setTimeout(() => setToast(''), 3500);
@@ -387,14 +431,12 @@ export default function QuotesPage() {
             <strong>{lines.length}</strong>
           </div>
           <div className={styles.summaryActions}>
-            <button className="btn btn-outline" onClick={openShare} disabled={lines.length === 0}>
+            <button className="btn btn-outline" onClick={handleOpenShare}>
               <i className="fas fa-envelope" /> Share
             </button>
             <button 
               className="btn btn-primary" 
-              onClick={printQuote} 
-              disabled={lines.length === 0 || !clientEmail.trim() || !clientPhone.trim()}
-              title={(!clientEmail.trim() || !clientPhone.trim()) ? "Client email and phone are required" : ""}
+              onClick={handlePrintQuote} 
             >
               <i className="fas fa-file-pdf" /> Download PDF
             </button>
@@ -605,9 +647,7 @@ export default function QuotesPage() {
                 <span>Live Preview</span>
                 <button 
                   className="btn btn-primary btn-sm" 
-                  onClick={printQuote} 
-                  disabled={lines.length === 0 || !clientEmail.trim() || !clientPhone.trim()}
-                  title={(!clientEmail.trim() || !clientPhone.trim()) ? "Client email and phone are required" : ""}
+                  onClick={handlePrintQuote} 
                 >
                   <i className="fas fa-file-pdf" /> PDF
                 </button>
@@ -769,7 +809,7 @@ function QuoteDocument({
           <img src="/images/logo2.jpeg" alt="Max-Hygiene" />
           <div>
             <h1>Max hygiene cleaning services</h1>
-            <p>local cleaner near you.</p>
+            <p>Local Cleaners Near You.</p>
             <p style={{ fontSize: '11px', color: '#666', marginTop: '4px', lineHeight: '1.4' }}>
               Technology House Newton Place<br />
               Post code: G3 7PR<br />
@@ -788,12 +828,12 @@ function QuoteDocument({
         <div>
           <span className={styles.docLabel}>Prepared For</span>
           <strong>{clientName || 'Client Name'}</strong>
-          <p>{clientEmail || 'client@email.com'}</p>
-          <p>{clientPhone || 'Client phone'}</p>
+          <p><strong>Email:</strong> <a style={{color: 'inherit', textDecoration: 'none', fontWeight: 'bold'}} href={`mailto:${clientEmail}`}><strong>{clientEmail || 'client@email.com'}</strong></a></p>
+          <p><strong>Phone:</strong> <strong>{clientPhone || 'Client phone'}</strong></p>
         </div>
         <div>
           <span className={styles.docLabel}>Property</span>
-          <p>{jobAddress || 'Property address'}</p>
+          <p><strong>Address:</strong> <strong>{jobAddress || 'Property address'}</strong></p>
         </div>
       </section>
 

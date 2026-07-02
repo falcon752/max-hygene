@@ -65,8 +65,8 @@
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 420px;
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
   align-items: start;
 }
 
@@ -158,10 +158,18 @@
 }
 
 .lineForm {
-  display: grid;
-  grid-template-columns: minmax(190px, 1.4fr) minmax(90px, 0.6fr) minmax(120px, 0.8fr) minmax(140px, 0.9fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   align-items: end;
+}
+
+.lineForm > label {
+  flex: 1 1 110px;
+}
+
+.lineForm > button {
+  flex: 0 0 auto;
 }
 
 .emptyLines {
@@ -214,7 +222,7 @@
   color: #1f2937;
   border: 1px solid var(--border);
   border-radius: 0 0 var(--radius) var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: none;
   padding: 28px;
   font-family: Poppins, Arial, sans-serif;
 }
@@ -257,6 +265,7 @@
   color: #1f2937;
   font-size: 0.95rem;
   line-height: 1.6;
+  font-weight: bold;
 }
 
 .quoteMeta {
@@ -286,18 +295,28 @@
   padding: 14px;
 }
 
-.clientGrid strong {
+.clientGrid > div > strong {
   display: block;
   color: var(--dark);
   font-size: 1.1rem;
   margin-bottom: 6px;
 }
 
+.clientGrid p {
+  font-size: 0.85rem;
+}
+
+.clientGrid p strong {
+  display: inline;
+  font-size: inherit;
+  margin: 0;
+}
+
 .docLabel {
   display: block;
   color: #4b5563;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 7px;
@@ -308,7 +327,7 @@
 }
 
 .docIntro h2 {
-  color: var(--dark);
+  color: #3bb0bd;
   font-size: 1.1rem;
   margin-bottom: 7px;
 }
@@ -326,6 +345,7 @@
 
 .quoteTable td {
   font-size: 0.9rem;
+  font-weight: bold;
 }
 
 .quoteTable th,
@@ -359,6 +379,7 @@
 
 .docTotals span {
   text-align: left;
+  font-weight: bold;
 }
 
 .docTotals strong {
@@ -605,7 +626,7 @@
 @media print {
   @page {
     size: A4;
-    margin: 14mm;
+    margin: 0;
   }
 
   .screenOnly {
@@ -620,7 +641,33 @@
     border: 0;
     box-shadow: none;
     border-radius: 0;
-    padding: 0;
+    padding: 10mm 15mm;
+    width: 100%;
+    box-sizing: border-box;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .quoteHeader {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .clientGrid {
+    margin-bottom: 15px;
+  }
+  
+  .docIntro {
+    margin-bottom: 10px;
+  }
+  
+  .quoteTable {
+    margin-bottom: 10px;
+  }
+  
+  .quoteFooter {
+    margin-top: 15px;
+    padding-top: 10px;
   }
 
   .quoteTable th {
