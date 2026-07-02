@@ -641,7 +641,7 @@
     border: 0;
     box-shadow: none;
     border-radius: 0;
-    padding: 10mm 15mm;
+    padding: 10mm 3mm;
     width: 100%;
     box-sizing: border-box;
     page-break-inside: avoid;
