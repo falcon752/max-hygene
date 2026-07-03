@@ -100,6 +100,14 @@ const today = () => new Date().toISOString().slice(0, 10);
 const DRAFT_KEY = 'max-hygiene.quote-generator.draft.v1';
 const DEFAULT_NOTES = 'Thank you for the opportunity to quote for this job. We look forward to working with you.';
 
+const CLEANING_TYPES = [
+  { value: '', label: '— Select cleaning type —' },
+  { value: 'Deep Clean', label: 'Deep Clean' },
+  { value: 'End of Tenancy', label: 'End of Tenancy' },
+  { value: 'Regular Standard Cleaning', label: 'Regular Standard Cleaning' },
+  { value: 'Commercial Cleaning', label: 'Commercial Cleaning' },
+];
+
 export default function QuotesPage() {
   const [quoteRef, setQuoteRef] = useState(`MHQ-${Date.now().toString().slice(-5)}`);
   const [clientName, setClientName] = useState('');
@@ -111,6 +119,7 @@ export default function QuotesPage() {
   const [hourlyRate, setHourlyRate] = useState(23);
   const [taxRate, setTaxRate] = useState(0);
   const [notes, setNotes] = useState(DEFAULT_NOTES);
+  const [cleaningType, setCleaningType] = useState('');
   const [lines, setLines] = useState<QuoteLine[]>([]);
   const [space, setSpace] = useState('');
   const [qty, setQty] = useState(1);
@@ -635,8 +644,16 @@ export default function QuotesPage() {
 
             <div className="card">
               <label className="form-group">
+                <span className="form-label">Type of Cleaning</span>
+                <select className="form-control" value={cleaningType} onChange={(e) => setCleaningType(e.target.value)}>
+                  {CLEANING_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="form-group" style={{ marginTop: '12px' }}>
                 <span className="form-label">Quote Notes</span>
-                <textarea className="form-control" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                <textarea className="form-control" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             </div>
           </section>
@@ -661,6 +678,7 @@ export default function QuotesPage() {
                 quoteDate={quoteDate}
                 validDays={validDays}
                 notes={notes}
+                cleaningType={cleaningType}
                 hourlyRate={hourlyRate}
                 taxRate={taxRate}
                 discount={discount}
@@ -759,6 +777,7 @@ export default function QuotesPage() {
           quoteDate={quoteDate}
           validDays={validDays}
           notes={notes}
+          cleaningType={cleaningType}
           hourlyRate={hourlyRate}
           taxRate={taxRate}
           discount={discount}
@@ -780,6 +799,7 @@ function QuoteDocument({
   quoteDate,
   validDays,
   notes,
+  cleaningType,
   hourlyRate,
   taxRate,
   discount,
@@ -795,6 +815,7 @@ function QuoteDocument({
   quoteDate: string;
   validDays: number;
   notes: string;
+  cleaningType: string;
   hourlyRate: number;
   taxRate: number;
   discount: number;
@@ -811,9 +832,9 @@ function QuoteDocument({
             <h1>Max hygiene cleaning services</h1>
             <p>Local Cleaners Near You.</p>
             <p style={{ fontSize: '11px', color: '#666', marginTop: '4px', lineHeight: '1.4' }}>
-              Technology House Newton Place<br />
+              9 Newton Place, Glasgow<br />
               Post code: G3 7PR<br />
-              (07743173136) | info@max-hygiencleaningpro.co.uk
+              03333357932 | info@max-hygiencleaningpro.co.uk
             </p>
           </div>
         </div>
@@ -839,6 +860,9 @@ function QuoteDocument({
 
       <section className={styles.docIntro}>
         <h2>Quote Summary</h2>
+        {cleaningType && (
+          <p style={{ fontWeight: 'bold', marginBottom: '6px' }}>Type of Cleaning: {cleaningType}</p>
+        )}
         <p>{notes}</p>
       </section>
 
